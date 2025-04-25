@@ -94,13 +94,11 @@ NGINX routes incoming traffic from ports `80` or `443` to your Docker container 
 
 ## 📸 Branding
 
-- Logo: `assets/applyflow-logo.png`
-- Favicons: `assets/favicon.ico` (light + dark modes)
-- System diagram: `applyflow-architecture.png`
+WIP
 
 ---
 
-## 🛠 Future Enhancements
+## 🛠 Features in beta
 
 - Bi-weekly Sprint Review generator (analytics)
 - Referral and follow-up reminders
