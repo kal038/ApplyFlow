@@ -1,39 +1,12 @@
+import { Request, Response } from "express";
 import {
   getJobById as getJobByIdDynamo,
-  getAllJobsUser as getAllJobsUserDynamo,
   createJob as createJobDynamo,
   updateJob as updateJobDynamo,
   deleteJob as deleteJobDynamo,
-} from "../services/dynamo.js";
-// const jobs = [
-//   {
-//     job_id: "job-001",
-//     user_id: "user-123",
-//     company: "Tesla",
-//     title: "Backend Engineer",
-//     status: "Interview",
-//     applied_date: "2025-04-01",
-//     notes: "Recruiter screen done",
-//   },
-//   {
-//     job_id: "job-002",
-//     user_id: "user-123",
-//     company: "Stripe",
-//     title: "Software Engineer",
-//     status: "Applied",
-//     applied_date: "2025-04-10",
-//     notes: "Waiting for response",
-//   },
-//   {
-//     job_id: "job-003",
-//     user_id: "user-456",
-//     company: "Meta",
-//     title: "Infrastructure Engineer",
-//     status: "Offer",
-//     applied_date: "2025-03-28",
-//     notes: "Offer received, deciding soon",
-//   },
-// ];
+} from "../services/dynamo";
+import { LineJob } from "../types/index";
+
 /*
 Controller functions, deal with request and response objects
 1. getAllJobs
@@ -42,34 +15,46 @@ Controller functions, deal with request and response objects
 4. updateJob
 5. deleteJob
 */
-export const getAllJobs = (request, response) => {
+export const getAllJobs = (request: Request, response: Response): void => {
   //access mock DB or array in memory
   //return jobs as JSON
-  response.json(jobs);
+  // Implementation needed - this appears to be using an undefined variable 'jobs'
+  response.status(501).json({ message: "Not implemented" });
 };
 
-export const getJobById = async (request, response) => {
+export const getJobById = async (
+  request: Request,
+  response: Response
+): Promise<void> => {
   // extract job_id from the request, stuff into const job_id
   const { job_id } = request.params;
   //look up
   //find job in dynamo
-  const job = await getJobByIdDynamo(job_id);
-  //if found, return job as JSON
-  if (job) {
-    response.json(job);
-  } else {
-    //if not found, return 404
-    response.status(404).json({ message: "Job not found" });
+  try {
+    const job = await getJobByIdDynamo(job_id);
+    //if found, return job as JSON
+    if (job) {
+      response.json(job);
+    } else {
+      //if not found, return 404
+      response.status(404).json({ message: "Job not found" });
+    }
+  } catch (error) {
+    console.error("Error getting job:", error);
+    response.status(500).json({ message: "Error retrieving job" });
   }
 };
 
-export const createJob = async (request, response) => {
+export const createJob = async (
+  request: Request,
+  response: Response
+): Promise<void> => {
   //extract job data from request body
   const job = request.body;
   //generate unique job_id
   const job_id = `job-${Math.floor(Math.random() * 1000)}`;
   //create new job object
-  const newJob = {
+  const newJob: LineJob = {
     job_id,
     user_id: job.user_id,
     company: job.company,
@@ -81,14 +66,17 @@ export const createJob = async (request, response) => {
   //call createJob function from dynamo service with async/await
   try {
     await createJobDynamo(newJob);
-    return response.status(201).json(newJob);
+    response.status(201).json(newJob);
   } catch (error) {
     console.error("Error creating job:", error);
-    return response.status(500).json({ message: "Error creating job" });
+    response.status(500).json({ message: "Error creating job" });
   }
 };
 
-export const deleteJob = async (request, response) => {
+export const deleteJob = async (
+  request: Request,
+  response: Response
+): Promise<void> => {
   //extract job_id from request params
   const { job_id } = request.params;
   //call deleteJob function from dynamo service
@@ -96,12 +84,13 @@ export const deleteJob = async (request, response) => {
     const data = await deleteJobDynamo(job_id);
     //if successful, return 204 No Content
     if (data.Attributes) {
-      console.log("Job deleted successfully:", data.Attributes);
+      console.error("Job deleted successfully:", data.Attributes);
     } else {
-      console.log("Job not found");
-      return response.status(404).json({ message: "Job not found" });
+      console.error("Job not found");
+      response.status(404).json({ message: "Job not found" });
+      return;
     }
-    //return 204 No Contentß
+    //return 204 No Content
     response.status(204).send();
   } catch (error) {
     console.error("Unexpected Error deleting job:", error);
@@ -110,13 +99,17 @@ export const deleteJob = async (request, response) => {
   }
 };
 
-export const updateJob = async (request, response) => {
+export const updateJob = async (
+  request: Request,
+  response: Response
+): Promise<void> => {
   //extract job_id from request params
   const { job_id } = request.params;
   //extract job data from request body
   const updated_job = request.body;
   if (!updated_job || Object.keys(updated_job).length === 0) {
-    return response.status(400).json({ message: "Invalid job data" });
+    response.status(400).json({ message: "Invalid job data" });
+    return;
   }
   // send job_id and updated_job to dynamo service
   try {
@@ -129,8 +122,12 @@ export const updateJob = async (request, response) => {
     }
   } catch (error) {
     console.error("Error updating job:", error);
-    if (error.name === "ConditionalCheckFailedException") {
-      return response.status(404).json({ message: "Job not found" });
+    if (
+      error instanceof Error &&
+      error.name === "ConditionalCheckFailedException"
+    ) {
+      response.status(404).json({ message: "Job not found" });
+      return;
     }
     response.status(500).json({ message: "Error updating job" });
   }

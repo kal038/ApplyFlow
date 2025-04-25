@@ -7,7 +7,8 @@ import {
   createJob,
   updateJob,
   deleteJob,
-} from "./controllers/jobsController.js";
+} from "./controllers/jobsController";
+import { Server } from "http";
 
 dotenv.config();
 
@@ -28,6 +29,8 @@ app.put(`${API_BASE}/jobs/:job_id`, updateJob);
 app.delete(`${API_BASE}/jobs/:job_id`, deleteJob);
 
 const PORT = process.env.PORT || 5050;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+const server: Server = app.listen(PORT, (): void => {
+  console.error(`Server is running on port ${PORT}`);
 });
+
+export default server;
