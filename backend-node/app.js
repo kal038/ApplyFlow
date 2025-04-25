@@ -15,17 +15,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const API = "/api/node/v1";
-// TODO GET /api/node/v1/jobs
-// Syntax for an endpoint is app.[METHOD](param1, param2) in which
+const API_BASE = "/api/node/v1";
+// Syntax: "app.[HTTP_METHOD](param1, param2)"
 // Param1: string -> API endpoint route literal
-// Param2: handler -> function with (request, response) => {do something w/ request and response objecst}
+// Param2: controller -> fn (request, response) => {parse rquest, return response}
 
-app.get(`${API}/jobs`, getAllJobs);
-app.get(`${API}/jobs/:job_id`, getJobById);
-app.post(`${API}/jobs`, createJob);
-app.put(`${API}/jobs/:job_id`, updateJob);
-app.delete(`${API}/jobs/:job_id`, deleteJob);
+// REST server, register endpoints
+app.get(`${API_BASE}/jobs`, getAllJobs);
+app.get(`${API_BASE}/jobs/:job_id`, getJobById);
+app.post(`${API_BASE}/jobs`, createJob);
+app.put(`${API_BASE}/jobs/:job_id`, updateJob);
+app.delete(`${API_BASE}/jobs/:job_id`, deleteJob);
 
 const PORT = process.env.PORT || 5050;
 app.listen(PORT, () => {

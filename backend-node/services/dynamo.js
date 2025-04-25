@@ -8,14 +8,12 @@ import {
   QueryCommand,
 } from "@aws-sdk/lib-dynamodb";
 import dotenv from "dotenv";
-// load env vars (dotenv)
-dotenv.config();
 
-// TABLE_NAME constant = 'ApplyFlowJobs'
+dotenv.config();
 const TABLE_NAME = "ApplyFlowJobs";
 const REGION = process.env.AWS_REGION || "us-east-1";
 const ddbClient = new DynamoDBClient({ region: REGION });
-const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
+const docClient = DynamoDBDocumentClient.from(ddbClient);
 
 // getJobById(job_id)
 // send GetCommand with TableName + Key { job_id }
@@ -26,7 +24,7 @@ export const getJobById = async (job_id) => {
     Key: { job_id },
   };
   try {
-    const data = await ddbDocClient.send(new GetCommand(params));
+    const data = await docClient.send(new GetCommand(params));
     return data.Item;
   } catch (error) {
     console.error("Error getting job:", error);
@@ -34,18 +32,99 @@ export const getJobById = async (job_id) => {
   }
 };
 
-// getJobsByUserId(user_id)
-// send QueryCommand
-// use IndexName = 'user_id-index'
-// KeyConditionExpression = 'user_id = :uid'
-// ExpressionAttributeValues = { ':uid': user_id }
+// getAllJobs(user_id)
+// send QueryCommand with TableName + KeyConditionExpression + ExpressionAttributeValues
+// return Items
 
-// createJob(jobData)
-// send PutCommand with TableName + Item
+export const getAllJobsUser = async (user_id) => {
+  //define query params
+  const params = {
+    TableName: TABLE_NAME,
+    KeyConditionExpression: "user_id = :user_id",
+    ExpressionAttributeValues: {
+      ":user_id": user_id,
+    },
+  };
+  //form the query
+  const query = new QueryCommand(params);
 
-// updateJob(job_id, updates)
-// (optional) build UpdateExpression from updates
-// send UpdateCommand with Key and updates
+  //hit the db, error handling
+  try {
+    const data = await docClient.send(query);
+    return data.Items;
+  } catch (error) {
+    console.error("Error getting jobs:", error);
+    throw error;
+  }
+};
 
-// deleteJob(job_id)
-// send DeleteCommand with Key { job_id }
+export const createJob = async (job) => {
+  const params = {
+    TableName: TABLE_NAME,
+    Item: job,
+  };
+
+  const createQuery = new PutCommand(params);
+
+  try {
+    const data = await docClient.send(createQuery);
+    return data;
+  } catch (error) {
+    console.error("Error creating job:", error);
+    throw error;
+  }
+};
+
+export const updateJob = async (job_id, job) => {
+  const params = {
+    TableName: TABLE_NAME,
+    Key: { job_id },
+    UpdateExpression:
+      "set #user_id = :user_id, #company = :company, #title = :title, #status = :status, #applied_date = :applied_date, #notes = :notes",
+    ExpressionAttributeNames: {
+      "#user_id": "user_id",
+      "#company": "company",
+      "#title": "title",
+      "#status": "status",
+      "#applied_date": "applied_date",
+      "#notes": "notes",
+    },
+    ExpressionAttributeValues: {
+      ":user_id": job.user_id,
+      ":company": job.company,
+      ":title": job.title,
+      ":status": job.status,
+      ":applied_date": job.applied_date,
+      ":notes": job.notes,
+    },
+    ReturnValues: "ALL_NEW",
+    ConditionExpression: "attribute_exists(job_id)",
+  };
+
+  const updateQuery = new UpdateCommand(params);
+
+  try {
+    const data = await docClient.send(updateQuery);
+    return data;
+  } catch (error) {
+    console.error("Error updating job:", error);
+    throw error;
+  }
+};
+
+export const deleteJob = async (job_id) => {
+  const params = {
+    TableName: TABLE_NAME,
+    Key: { job_id },
+  };
+
+  const deleteQuery = new DeleteCommand(params);
+
+  try {
+    const data = await docClient.send(deleteQuery);
+    return data;
+  } catch (error) {
+    console.error("Error deleting job:", error);
+    throw error;
+  }
+};
