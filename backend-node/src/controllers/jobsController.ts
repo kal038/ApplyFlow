@@ -6,6 +6,7 @@ import {
   deleteJob as deleteJobDynamo,
 } from "../services/dynamo";
 import { LineJob } from "../types/index";
+import { v4 as uuidv4 } from "uuid";
 
 /*
 Controller functions, deal with request and response objects
@@ -52,7 +53,7 @@ export const createJob = async (
   //extract job data from request body
   const job = request.body;
   //generate unique job_id
-  const job_id = `job-${Math.floor(Math.random() * 1000)}`;
+  const job_id = `job-${uuidv4()}`;
   //create new job object
   const newJob: LineJob = {
     job_id,
