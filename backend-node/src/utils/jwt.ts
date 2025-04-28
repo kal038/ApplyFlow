@@ -26,6 +26,7 @@ export const signToken = (user: AuthUser): string => {
   });
 };
 
-export const verifyToken = (token: string): AuthUser => {
-  return jwt.verify(token, SECRET) as AuthUser;
-};
+// don't need because passport does this for us
+// export const verifyToken = (token: string): AuthUser => {
+//   return jwt.verify(token, SECRET) as AuthUser;
+// };

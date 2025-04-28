@@ -26,3 +26,8 @@ export interface AuthUser {
 export interface AuthRequest extends Request {
   user?: AuthUser;
 }
+
+export interface CustomError extends Error {
+  statusCode?: number;
+  isOperational?: boolean;
+}

@@ -1,17 +1,17 @@
 import { Router, Request, Response } from "express";
-import passport from "passport";
-import { signToken } from "../utils/jwt";
-import { createUser, findUserByEmail } from "../services/userService";
+import {
+  signupHandler,
+  loginHandler,
+  logoutHandler,
+  meHandler,
+} from "../controllers/authController";
 import { authenticateJWT } from "../middleware/authenticate";
 
 const router = Router();
 
-router.post();
-
-router.post();
-
-router.post();
-
-router.get();
+router.post("/signup", signupHandler);
+router.post("/login", loginHandler);
+router.post("/logout", logoutHandler);
+router.get("/me", authenticateJWT, meHandler);
 
 export default router;

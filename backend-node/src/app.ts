@@ -10,6 +10,7 @@ import {
 } from "./controllers/jobsController";
 import cookieParser from "cookie-parser";
 import passport from "passport";
+import { errorHandler } from "@/middleware/errorHandler";
 
 /*
  *taxonomy of the app
@@ -46,5 +47,8 @@ app.get(`${API_BASE}/jobs/:job_id`, getJobById);
 app.post(`${API_BASE}/jobs`, createJob);
 app.put(`${API_BASE}/jobs/:job_id`, updateJob);
 app.delete(`${API_BASE}/jobs/:job_id`, deleteJob);
+
+// Global error handler
+app.use(errorHandler);
 
 export default app;

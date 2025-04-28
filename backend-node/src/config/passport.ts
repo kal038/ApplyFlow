@@ -1,7 +1,8 @@
+import { User } from "./../types/index";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
-import { AuthUser } from "../types";
+import { AuthUser } from "@/types";
 import { findUserByEmail, findUserById } from "../services/userService";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
@@ -22,7 +23,7 @@ passport.use(
         if (!user) return done(null, false, { message: "Unknown email" });
         const match = await bcrypt.compare(
           password,
-          (user as any).password_hash
+          (user as User).password_hash
         );
         if (!match) return done(null, false, { message: "Bad password" });
         return done(null, { user_id: user.user_id, email: user.email });
