@@ -4,9 +4,8 @@ export interface User {
   user_id: string;
   email: string;
   name?: string;
-  password?: string;
+  password_hash: string;
   created_at: string;
-  updated_at: string;
 }
 
 export interface LineJob {
@@ -23,7 +22,12 @@ export interface AuthUser {
   user_id: string;
   email: string;
 }
-
+//request with a user property
 export interface AuthRequest extends Request {
   user?: AuthUser;
+}
+
+export interface CustomError extends Error {
+  statusCode?: number;
+  isOperational?: boolean;
 }
