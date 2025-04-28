@@ -1,5 +1,5 @@
-import { docClient } from "../lib/db";
-import { User } from "../types";
+import { docClient } from "@/lib/db";
+import { User } from "@/types";
 import { QueryCommand, PutCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { v4 as uuidv4 } from "uuid";
 import { hash } from "bcrypt";
