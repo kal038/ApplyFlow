@@ -1,102 +1,116 @@
 import { Request, Response } from "express";
 import {
-  getJobById as getJobByIdDynamo,
+  getJobsByUserId as getJobsByUserIdDynamo,
+  getJobById as getJobByJobIdDynamo,
   createJob as createJobDynamo,
   updateJob as updateJobDynamo,
   deleteJob as deleteJobDynamo,
-} from "../services/dynamo";
-import { LineJob } from "../types/index";
-import { v4 as uuidv4 } from "uuid";
+} from "@/services/dynamo";
+import { LineJob } from "@/types/index";
+import { generateJobId } from "@/utils/generateJobId";
+import { AuthUser } from "../types/index";
+import { AppError } from "@/utils/AppError";
+import { assertOwnership } from "@/utils/assertOwnership";
 
 /*
 Controller functions, deal with request and response objects
-1. getAllJobs
-2. getJobById
-3. createJob
-4. updateJob
-5. deleteJob
+1. getAllJobs (get all jobs for a certain user)
+2. getJobById (get a job by job_id)
+3. createJob (create a new job, generate random job_id with helper)
+4. updateJob (update a job with job_id, check on body)
+5. deleteJob (delete a job with job_id)
 */
-export const getAllJobs = (request: Request, response: Response): void => {
-  //access mock DB or array in memory
-  //return jobs as JSON
-  // Implementation needed - this appears to be using an undefined variable 'jobs'
-  response.status(501).json({ message: "Not implemented" });
-};
 
-export const getJobById = async (
+/**
+ * Retrieves all jobs associated with an authenticated user.
+ *
+ * @param request - Express Request object containing authenticated user information
+ * @param response - Express Response object to send back the jobs data
+ * @throws {AppError} If retrieving jobs from DynamoDB fails
+ * @returns Promise<void> - Returns void, sends JSON response with jobs data
+ */
+export const getAllJobs = async (
   request: Request,
   response: Response
 ): Promise<void> => {
-  // extract job_id from the request, stuff into const job_id
-  const { job_id } = request.params;
-  //look up
-  //find job in dynamo
+  const authUser = request.user as AuthUser; //telling Ts that request.user is of type AuthUser
+  //extract user_id from request confidently
+  const { user_id } = authUser;
   try {
-    const job = await getJobByIdDynamo(job_id);
-    //if found, return job as JSON
-    if (job) {
-      response.json(job);
-    } else {
-      //if not found, return 404
-      response.status(404).json({ message: "Job not found" });
-    }
+    const jobs = await getJobsByUserIdDynamo(user_id);
+    response.status(200).json(jobs);
   } catch (error) {
-    console.error("Error getting job:", error);
-    response.status(500).json({ message: "Error retrieving job" });
+    throw new AppError("Error retrieving jobs", 500);
   }
 };
 
+/**
+ * Create job with authenticated user information.
+ *
+ * @param request - Express Request object containing authenticated user information
+ * @param response - Express Response object to send back the jobs data
+ * @throws {AppError} If retrieving jobs from DynamoDB fails
+ * @returns Promise<void> - Returns void, sends JSON response with new job data
+ */
 export const createJob = async (
   request: Request,
   response: Response
 ): Promise<void> => {
+  const authUser = request.user as AuthUser; //telling Ts that request.user is of type AuthUser
+  //extract user_id from request confidently
+  const { user_id } = authUser;
   //extract job data from request body
-  const job = request.body;
-  //generate unique job_id
-  const job_id = `job-${uuidv4()}`;
+  const jobData = request.body;
   //create new job object
+  const job_id = generateJobId();
   const newJob: LineJob = {
-    job_id,
-    user_id: job.user_id,
-    company: job.company,
-    title: job.title,
-    status: job.status,
-    applied_date: job.applied_date,
-    notes: job.notes,
+    job_id: job_id,
+    user_id: user_id,
+    company: jobData.company,
+    title: jobData.title,
+    status: jobData.status,
+    applied_date: jobData.applied_date,
+    notes: jobData.notes,
   };
   //call createJob function from dynamo service with async/await
   try {
     await createJobDynamo(newJob);
     response.status(201).json(newJob);
   } catch (error) {
-    console.error("Error creating job:", error);
-    response.status(500).json({ message: "Error creating job" });
+    throw new AppError("Error creating job", 500);
   }
 };
 
+/**
+ * Delete job by job id, have to confirm job exists and is owned by user
+ *
+ * @param request - Express Request object containing authenticated user information
+ * @param response - Express Response object to send back the jobs data
+ * @throws {AppError} If retrieving jobs from DynamoDB fails
+ * @returns Promise<void> - Returns void, sends JSON response with new job data
+ */
 export const deleteJob = async (
   request: Request,
   response: Response
 ): Promise<void> => {
-  //extract job_id from request params
+  const authUser = request.user as AuthUser;
+  const userId = authUser.user_id;
   const { job_id } = request.params;
-  //call deleteJob function from dynamo service
+
   try {
-    const data = await deleteJobDynamo(job_id);
-    //if successful, return 204 No Content
-    if (data.Attributes) {
-      console.error("Job deleted successfully:", data.Attributes);
-    } else {
-      console.error("Job not found");
-      response.status(404).json({ message: "Job not found" });
-      return;
+    const job = await getJobByJobIdDynamo(job_id);
+
+    if (!job) {
+      throw new AppError("Job not found", 404);
     }
-    //return 204 No Content
+
+    assertOwnership(job, userId);
+
+    await deleteJobDynamo(job_id); // delete from db
+
     response.status(204).send();
   } catch (error) {
-    console.error("Unexpected Error deleting job:", error);
-    // Handle other errors
-    response.status(500).json({ message: "Unexpected Error deleting job" });
+    throw new AppError("Error deleting job", 500);
   }
 };
 
@@ -104,32 +118,24 @@ export const updateJob = async (
   request: Request,
   response: Response
 ): Promise<void> => {
-  //extract job_id from request params
+  const authUser = request.user as AuthUser;
+  const userId = authUser.user_id;
   const { job_id } = request.params;
-  //extract job data from request body
-  const updated_job = request.body;
-  if (!updated_job || Object.keys(updated_job).length === 0) {
-    response.status(400).json({ message: "Invalid job data" });
-    return;
-  }
-  // send job_id and updated_job to dynamo service
+  const updatedFields: Partial<LineJob> = request.body;
+
   try {
-    const data = await updateJobDynamo(job_id, updated_job);
-    //if successful, return 200 OK with updated job
-    if (data.Attributes) {
-      response.status(200).json(data.Attributes);
-    } else {
-      response.status(404).json({ message: "Job not found" });
+    const job = await getJobByJobIdDynamo(job_id);
+
+    if (!job) {
+      throw new AppError("Job not found", 404); // we expect this may happen in our app
     }
+
+    assertOwnership(job, userId);
+
+    const updatedJob = await updateJobDynamo(job_id, updatedFields);
+
+    response.status(200).json({ job: updatedJob.Attributes });
   } catch (error) {
-    console.error("Error updating job:", error);
-    if (
-      error instanceof Error &&
-      error.name === "ConditionalCheckFailedException"
-    ) {
-      response.status(404).json({ message: "Job not found" });
-      return;
-    }
-    response.status(500).json({ message: "Error updating job" });
+    throw new AppError("Error updating job", 500);
   }
 };
