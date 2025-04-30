@@ -19,9 +19,9 @@ const docClient = DynamoDBDocumentClient.from(ddbClient);
 
 // Define return types for DynamoDB responses
 interface DynamoDBResponse {
-  Item?: LineJob;
-  Items?: LineJob[];
-  Attributes?: LineJob;
+  Item?: LineJob; //returned by a GetCommand
+  Items?: LineJob[]; //returned by a QueryCommand and ScanCommand
+  Attributes?: LineJob; //returned by an UpdateCommand or DeleteCommand
 }
 
 // getJobById(job_id)
@@ -42,10 +42,11 @@ export const getJobById = async (
 };
 
 // getAllJobs(user_id)
-export const getAllJobsUser = async (user_id: string): Promise<LineJob[]> => {
+export const getJobsByUserId = async (user_id: string): Promise<LineJob[]> => {
   //define query params
   const params = {
     TableName: TABLE_NAME,
+    IndexName: "user-id-index", // Assuming you have a GSI on user_id, which we do
     KeyConditionExpression: "user_id = :user_id",
     ExpressionAttributeValues: {
       ":user_id": user_id,

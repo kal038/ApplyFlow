@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express";
+import { Router } from "express";
 import {
   signupHandler,
   loginHandler,
@@ -7,11 +7,9 @@ import {
 } from "../controllers/authController";
 import { authenticateJWT } from "../middleware/authenticate";
 
-const router = Router();
+export const router = Router();
 
 router.post("/signup", signupHandler);
 router.post("/login", loginHandler);
 router.post("/logout", logoutHandler);
 router.get("/me", authenticateJWT, meHandler);
-
-export default router;
