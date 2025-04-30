@@ -9,10 +9,10 @@ export function validateCreateJob(
   const { title, description } = req.body;
 
   if (typeof title !== "string" || title.trim() === "") {
-    return next(new AppError("Invalid or missing 'title'", 400));
+    return next(new AppError("Invalid or missing title", 400));
   }
   if (typeof description !== "string" || description.trim() === "") {
-    return next(new AppError("Invalid or missing 'description'", 400));
+    return next(new AppError("Invalid or missing description", 400));
   }
 
   next();

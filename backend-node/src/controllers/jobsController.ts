@@ -11,7 +11,6 @@ import { generateJobId } from "@/utils/generateJobId";
 import { AuthUser } from "../types/index";
 import { AppError } from "@/utils/AppError";
 import { assertOwnership } from "@/utils/assertOwnership";
-import { get } from "http";
 
 /*
 Controller functions, deal with request and response objects
@@ -70,7 +69,7 @@ export const createJob = async (
     company: jobData.company,
     title: jobData.title,
     status: jobData.status,
-    applied_date: jobData,
+    applied_date: jobData.applied_date,
     notes: jobData.notes,
   };
   //call createJob function from dynamo service with async/await
