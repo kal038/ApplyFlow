@@ -13,17 +13,17 @@ dotenv.config();
  * if the item is found, it resolves to the item
  */
 
-interface DynamoDBResponse {
-  Item?: User;
-  Items?: User[];
-  Attributes?: User;
-}
+// interface DynamoDBResponse {
+//   Item?: User;
+//   Items?: User[];
+//   Attributes?: User;
+// }
 
 export const findUserByEmail = async (
   email: string
 ): Promise<User | undefined> => {
   const params = {
-    TableName: process.env.USERS_TABLE,
+    TableName: process.env.USERS_TABLE || "Users",
     IndexName: "email-index",
     KeyConditionExpression: "email = :email",
     ExpressionAttributeValues: {

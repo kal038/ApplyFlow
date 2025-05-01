@@ -3,7 +3,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
 import { AuthUser } from "@/types";
-import { findUserByEmail, findUserById } from "../services/userService";
+import { findUserByEmail } from "../services/userService";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 dotenv.config();

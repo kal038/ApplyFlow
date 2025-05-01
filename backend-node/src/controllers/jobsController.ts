@@ -5,7 +5,7 @@ import {
   createJob as createJobDynamo,
   updateJob as updateJobDynamo,
   deleteJob as deleteJobDynamo,
-} from "@/services/dynamo";
+} from "@/services/jobService";
 import { LineJob } from "@/types/index";
 import { generateJobId } from "@/utils/generateJobId";
 import { AuthUser } from "../types/index";
