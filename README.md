@@ -14,41 +14,17 @@ Applyflow is a fully serverless application that empowers job seekers to manage 
 ## 🧰 Tech Stack
 
 | Layer         | Stack                              |
-|---------------|-------------------------------------|
+|---------------|------------------------------------|
 | Frontend      | React + TailwindCSS                |
-| Hosting       | AWS Amplify / S3 (Static SPA)       |
+| Hosting       | EC2                                |
 | Backend       | Node.js (Express) in Docker        |
-| Infra         | EC2 (Ubuntu) + NGINX reverse proxy |
-| Auth          | AWS Cognito (JWT sessions)         |
-| Database      | DynamoDB (user-scoped jobs)        |
+| Infra         | EC2 (AMZ Linux) + NGINX rev proxy  |
+| Auth          | Passport JS Local + JWT            |
+| Database      | DynamoDB                           |
 | File Storage  | AWS S3 (Resume uploads)            |
-| Caching       | Redis (Upstash or ElastiCache)     |
+| Caching       | Redis (ElastiCache)                |
 | CI/CD         | GitHub Actions (Frontend + Backend)|
 | Monitoring    | AWS CloudWatch                     |
-
----
-
-## 🔐 Authentication Flow
-
-- Cognito manages signup/login/session
-- Frontend stores JWT securely
-- NGINX proxies requests to Docker container
-- Backend validates JWT from `Authorization` header
-- Data access is scoped per user via `user_id` claims
-
----
-
-## 📂 DynamoDB Schema
-
-| Field         | Type    | Notes                          |
-|---------------|---------|--------------------------------|
-| `job_id`      | string  | Primary key                    |
-| `user_id`     | string  | Used for user scoping          |
-| `company`     | string  |                                |
-| `title`       | string  |                                |
-| `status`      | string  | Applied, Interview, Offer, etc |
-| `applied_date`| string  | ISO format                     |
-| `notes`       | string  | Freeform                       |
 
 ---
 
@@ -84,8 +60,6 @@ NGINX routes incoming traffic from ports `80` or `443` to your Docker container 
 ## ✅ MVP Features
 
 - [x] JWT-authenticated CRUD API for jobs
-- [x] Resume upload to S3 + pre-signed download URLs
-- [x] Redis cache for resume URLs (TTL 60s)
 - [x] Dashboard UI with job filtering
 - [x] EC2 + Docker + NGINX deployment
 - [x] GitHub Actions for CI/CD
@@ -105,6 +79,8 @@ WIP
 - Slack/email nudges for daily job actions
 - Smart priority ranking of jobs based on stage
 - Rejections analytics -> Continuous improvement
+- Resume upload to S3 + pre-signed download URLs
+- Redis cache for resume URLs 
 ## 📬 Contact
 
 Built by [Khoi Lam](https://github.com/kal038)
