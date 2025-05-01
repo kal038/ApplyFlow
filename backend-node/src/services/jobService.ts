@@ -1,5 +1,4 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
+import { docClient } from "@/lib/db";
 import {
   GetCommand,
   PutCommand,
@@ -9,13 +8,8 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import { ReturnValue } from "@aws-sdk/client-dynamodb";
 import dotenv from "dotenv";
-import { LineJob } from "../types";
-
+import { LineJob } from "@/types";
 dotenv.config();
-const TABLE_NAME = "ApplyFlowJobs";
-const REGION = process.env.AWS_REGION || "us-east-1";
-const ddbClient = new DynamoDBClient({ region: REGION });
-const docClient = DynamoDBDocumentClient.from(ddbClient);
 
 // Define return types for DynamoDB responses
 interface DynamoDBResponse {
@@ -29,7 +23,7 @@ export const getJobById = async (
   job_id: string
 ): Promise<LineJob | undefined> => {
   const params = {
-    TableName: TABLE_NAME,
+    TableName: process.env.JOBS_TABLE || "ApplyFlow",
     Key: { job_id },
   };
   try {
@@ -45,7 +39,7 @@ export const getJobById = async (
 export const getJobsByUserId = async (user_id: string): Promise<LineJob[]> => {
   //define query params
   const params = {
-    TableName: TABLE_NAME,
+    TableName: process.env.JOBS_TABLE || "ApplyFlow",
     IndexName: "user-id-index", // Assuming you have a GSI on user_id, which we do
     KeyConditionExpression: "user_id = :user_id",
     ExpressionAttributeValues: {
@@ -58,7 +52,7 @@ export const getJobsByUserId = async (user_id: string): Promise<LineJob[]> => {
   //hit the db, error handling
   try {
     const data = await docClient.send(query);
-    return (data.Items || []) as LineJob[];
+    return data.Items as LineJob[];
   } catch (error) {
     console.error("Error getting jobs:", error);
     throw error;
@@ -67,7 +61,7 @@ export const getJobsByUserId = async (user_id: string): Promise<LineJob[]> => {
 
 export const createJob = async (job: LineJob): Promise<DynamoDBResponse> => {
   const params = {
-    TableName: TABLE_NAME,
+    TableName: process.env.JOBS_TABLE || "ApplyFlow",
     Item: job,
   };
 
@@ -101,7 +95,7 @@ export const updateJob = async (
   });
 
   const params = {
-    TableName: TABLE_NAME,
+    TableName: process.env.JOBS_TABLE || "ApplyFlow",
     Key: { job_id },
     UpdateExpression: `set ${updateFields.join(", ")}`,
     ExpressionAttributeNames: expressionNames,
@@ -121,7 +115,7 @@ export const updateJob = async (
 
 export const deleteJob = async (job_id: string): Promise<DynamoDBResponse> => {
   const params = {
-    TableName: TABLE_NAME,
+    TableName: process.env.JOBS_TABLE || "ApplyFlow",
     Key: { job_id },
     ReturnValues: ReturnValue.ALL_OLD,
   };
