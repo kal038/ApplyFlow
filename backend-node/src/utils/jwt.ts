@@ -1,7 +1,10 @@
 import jwt from "jsonwebtoken";
 import { AuthUser } from "../types";
 
-const SECRET = process.env.JWT_SECRET || "default_secret";
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable must be set.");
+}
 const EXPIRATION_TIME = "1h"; // Token expiration time
 
 // JWT is just a string, generated with a secret and a payload
@@ -21,7 +24,7 @@ const EXPIRATION_TIME = "1h"; // Token expiration time
 */
 
 export const signToken = (user: AuthUser): string => {
-  return jwt.sign({ user_id: user.user_id, email: user.email }, SECRET, {
+  return jwt.sign({ user_id: user.user_id, email: user.email }, JWT_SECRET, {
     expiresIn: EXPIRATION_TIME,
   });
 };
