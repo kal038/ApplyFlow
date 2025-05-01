@@ -23,7 +23,7 @@ export const getJobById = async (
   job_id: string
 ): Promise<LineJob | undefined> => {
   const params = {
-    TableName: process.env.JOBS_TABLE || "ApplyFlow",
+    TableName: process.env.JOBS_TABLE || "ApplyFlowJobs",
     Key: { job_id },
   };
   try {
@@ -39,7 +39,7 @@ export const getJobById = async (
 export const getJobsByUserId = async (user_id: string): Promise<LineJob[]> => {
   //define query params
   const params = {
-    TableName: process.env.JOBS_TABLE || "ApplyFlow",
+    TableName: process.env.JOBS_TABLE || "ApplyFlowJobs",
     IndexName: "user-id-index", // Assuming you have a GSI on user_id, which we do
     KeyConditionExpression: "user_id = :user_id",
     ExpressionAttributeValues: {
@@ -61,7 +61,7 @@ export const getJobsByUserId = async (user_id: string): Promise<LineJob[]> => {
 
 export const createJob = async (job: LineJob): Promise<DynamoDBResponse> => {
   const params = {
-    TableName: process.env.JOBS_TABLE || "ApplyFlow",
+    TableName: process.env.JOBS_TABLE || "ApplyFlowJobs",
     Item: job,
   };
 
@@ -95,7 +95,7 @@ export const updateJob = async (
   });
 
   const params = {
-    TableName: process.env.JOBS_TABLE || "ApplyFlow",
+    TableName: process.env.JOBS_TABLE || "ApplyFlowJobs",
     Key: { job_id },
     UpdateExpression: `set ${updateFields.join(", ")}`,
     ExpressionAttributeNames: expressionNames,
@@ -115,7 +115,7 @@ export const updateJob = async (
 
 export const deleteJob = async (job_id: string): Promise<DynamoDBResponse> => {
   const params = {
-    TableName: process.env.JOBS_TABLE || "ApplyFlow",
+    TableName: process.env.JOBS_TABLE || "ApplyFlowJobs",
     Key: { job_id },
     ReturnValues: ReturnValue.ALL_OLD,
   };

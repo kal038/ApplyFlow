@@ -6,13 +6,10 @@ export function validateCreateJob(
   res: Response,
   next: NextFunction
 ) {
-  const { title, description } = req.body;
+  const { title } = req.body;
 
   if (typeof title !== "string" || title.trim() === "") {
     return next(new AppError("Invalid or missing title", 400));
-  }
-  if (typeof description !== "string" || description.trim() === "") {
-    return next(new AppError("Invalid or missing description", 400));
   }
 
   next();
@@ -23,19 +20,13 @@ export function validateUpdateJob(
   res: Response,
   next: NextFunction
 ) {
-  const { title, description } = req.body;
+  const { title } = req.body;
 
   if (
     title !== undefined &&
     (typeof title !== "string" || title.trim() === "")
   ) {
     return next(new AppError("Invalid or missing 'title'", 400));
-  }
-  if (
-    description !== undefined &&
-    (typeof description !== "string" || description.trim() === "")
-  ) {
-    return next(new AppError("Invalid description'", 400));
   }
 
   next();
