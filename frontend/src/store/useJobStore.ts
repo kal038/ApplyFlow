@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 import type { Job } from "../types";
 
 interface JobStore {
@@ -13,72 +14,69 @@ interface JobStore {
   deleteJob: (job_id: string) => Promise<void>;
 }
 
-export const useJobStore = create<JobStore>((set) => ({
-  jobs: [],
-  loading: false,
+export const useJobStore = create<JobStore>()(
+  devtools(
+    (set) => ({
+      jobs: [
+        {
+          job_id: "1",
+          company: "Google",
+          title: "Backend Engineer",
+          status: "Applied",
+          applied_date: "2025-05-01",
+          notes: "Referred by Alice",
+        },
+        {
+          job_id: "2",
+          company: "Tesla",
+          title: "Software Engineer",
+          status: "Interview",
+          applied_date: "2025-04-20",
+          notes: "Technical interview scheduled",
+        },
+      ],
+      loading: false,
 
-  fetchJobs: async () => {
-    set({ loading: true });
-    try {
-      const res = await fetch("/api/v1/jobs", { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch jobs");
-      const data: Job[] = await res.json();
-      set({ jobs: data });
-    } catch (err) {
-      console.error("Fetch jobs error:", err);
-    } finally {
-      set({ loading: false });
-    }
-  },
+      fetchJobs: async () => {
+        console.log("fetchJobs called");
+      },
 
-  addJob: async (job) => {
-    try {
-      const res = await fetch("/api/v1/jobs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(job),
-      });
-      if (!res.ok) throw new Error("Failed to add job");
-      const created: Job = await res.json();
-      set((state) => ({
-        jobs: [...state.jobs, created],
-      }));
-    } catch (err) {
-      console.error("Add job error:", err);
-    }
-  },
+      addJob: async (job) => {
+        const newJob: Job = {
+          ...job,
+          job_id: crypto.randomUUID(),
+        };
+        set(
+          (state) => ({
+            jobs: [...state.jobs, newJob],
+          }),
+          false,
+          "addJob"
+        ); // name action for DevTools
+      },
 
-  editJob: async (job_id, updatedFields) => {
-    try {
-      const res = await fetch(`/api/v1/jobs/${job_id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(updatedFields),
-      });
-      if (!res.ok) throw new Error("Failed to edit job");
-      const updated: Job = await res.json();
-      set((state) => ({
-        jobs: state.jobs.map((job) => (job.job_id === job_id ? updated : job)),
-      }));
-    } catch (err) {
-      console.error("Edit job error:", err);
-    }
-  },
+      editJob: async (job_id, updatedFields) => {
+        set(
+          (state) => ({
+            jobs: state.jobs.map((job) =>
+              job.job_id === job_id ? { ...job, ...updatedFields } : job
+            ),
+          }),
+          false,
+          "editJob"
+        );
+      },
 
-  deleteJob: async (job_id) => {
-    try {
-      const res = await fetch(`/api/v1/jobs/${job_id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to delete job");
-      set((state) => ({
-        jobs: state.jobs.filter((job) => job.job_id !== job_id),
-      }));
-    } catch (err) {
-      console.error("Delete job error:", err);
-    }
-  },
-}));
+      deleteJob: async (job_id) => {
+        set(
+          (state) => ({
+            jobs: state.jobs.filter((job) => job.job_id !== job_id),
+          }),
+          false,
+          "deleteJob"
+        );
+      },
+    }),
+    { name: "JobStore" }
+  )
+);

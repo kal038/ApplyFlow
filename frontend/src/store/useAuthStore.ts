@@ -1,56 +1,47 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { devtools, persist } from "zustand/middleware";
 import type { User } from "../types";
 
 interface AuthState {
   isAuthenticated: boolean;
   user: User | null;
   token: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (user: User, token?: string) => void;
   logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      isAuthenticated: false,
-      user: null,
-      token: null,
-      login: async (email, password) => {
-        try {
-          const response = await fetch("/api/v1/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include", // if backend uses cookies
-            body: JSON.stringify({ email, password }),
-          });
+  devtools(
+    persist(
+      (set) => ({
+        isAuthenticated: false,
+        user: null,
+        token: null,
 
-          if (!response.ok) {
-            throw new Error("Login failed");
-          }
+        login: (user, token) =>
+          set(
+            {
+              isAuthenticated: true,
+              user,
+              token: token ?? null,
+            },
+            false,
+            "login"
+          ),
 
-          const data = await response.json();
-
-          // Assuming backend returns: { token, user: { userId, email } }
-          set({
-            isAuthenticated: true,
-            user: data.user,
-            token: data.token,
-          });
-        } catch (err) {
-          console.error("Auth error:", err);
-          throw err;
-        }
-      },
-      logout: () =>
-        set({
-          isAuthenticated: false,
-          user: null,
-          token: null,
-        }),
-    }),
-    {
-      name: "applyflow-auth",
-    }
+        logout: () =>
+          set(
+            {
+              isAuthenticated: false,
+              user: null,
+              token: null,
+            },
+            false,
+            "logout"
+          ),
+      }),
+      { name: "applyflow-auth" }
+    ),
+    { name: "AuthStore" }
   )
 );
