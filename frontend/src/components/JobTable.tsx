@@ -1,9 +1,9 @@
 import { useJobStore } from "../store/useJobStore";
 import {
-  ColumnDef,
-  flexRender,
   getCoreRowModel,
   useReactTable,
+  ColumnDef,
+  flexRender,
 } from "@tanstack/react-table";
 import type { Job } from "../types";
 import {
@@ -14,6 +14,9 @@ import {
   TableCell,
   TableHead,
 } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal } from "lucide-react";
 
 interface JobTableProps {
   onEdit: (job: Job) => void;
@@ -25,60 +28,76 @@ export function JobTable({ onEdit, onDelete }: JobTableProps) {
 
   const columns: ColumnDef<Job>[] = [
     {
-      header: "Company",
-      accessorKey: "company",
-      cell: (info) => (
-        <span className="font-medium">{info.getValue() as string}</span>
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+          className="translate-y-[2px]"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+          className="translate-y-[2px]"
+        />
       ),
     },
     {
-      header: "Title",
-      accessorKey: "title",
+      accessorKey: "company",
+      header: "Company",
+      cell: (info) => (
+        <div className="font-medium">{info.getValue() as string}</div>
+      ),
     },
+    { accessorKey: "title", header: "Title" },
     {
-      header: "Status",
       accessorKey: "status",
+      header: "Status",
       cell: (info) => {
         const status = info.getValue() as string;
         return (
-          <span
-            className={`px-2 py-1 rounded-full text-xs font-medium ${
-              status === "Applied"
-                ? "bg-blue-100 text-blue-800"
-                : status === "Interview"
-                ? "bg-yellow-100 text-yellow-800"
-                : status === "Offer"
-                ? "bg-green-100 text-green-800"
-                : status === "Rejected"
-                ? "bg-red-100 text-red-800"
-                : "bg-gray-100 text-gray-800"
-            }`}
-          >
-            {status}
-          </span>
+          <div className="flex w-[110px] items-center">
+            <span
+              className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
+                status === "Applied"
+                  ? "bg-blue-400/10 text-blue-400 ring-blue-400/30"
+                  : status === "Interview"
+                  ? "bg-yellow-400/10 text-yellow-400 ring-yellow-400/30"
+                  : status === "Offer"
+                  ? "bg-green-400/10 text-green-400 ring-green-400/30"
+                  : status === "Rejected"
+                  ? "bg-red-400/10 text-red-400 ring-red-400/30"
+                  : "bg-gray-400/10 text-gray-400 ring-gray-400/30"
+              }`}
+            >
+              {status}
+            </span>
+          </div>
         );
       },
     },
+    { accessorKey: "applied_date", header: "Applied" },
     {
-      header: "Applied",
-      accessorKey: "applied_date",
-    },
-    {
-      header: "Actions",
+      id: "actions",
+      header: "",
       cell: ({ row }) => (
-        <div className="flex gap-2">
-          <button
+        <div className="flex justify-end">
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => onEdit(row.original)}
-            className="text-sm px-2 py-1 rounded bg-blue-500 text-white hover:bg-blue-600"
+            className="h-8 w-8 p-0"
           >
-            Edit
-          </button>
-          <button
-            onClick={() => onDelete(row.original.job_id)}
-            className="text-sm px-2 py-1 rounded bg-red-500 text-white hover:bg-red-600"
-          >
-            Delete
-          </button>
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
         </div>
       ),
     },
@@ -91,17 +110,28 @@ export function JobTable({ onEdit, onDelete }: JobTableProps) {
   });
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 py-6">
-      <div className="rounded-md border bg-white shadow-md overflow-hidden">
+    <div className="container py-8 md:flex flex-col space-y-8">
+      <div className="flex items-center justify-between space-y-2">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Job Applications
+          </h2>
+          <p className="text-muted-foreground">
+            Track all your job applications in one place
+          </p>
+        </div>
+        <div className="flex items-center space-x-2">
+          {/* User profile or actions could go here */}
+        </div>
+      </div>
+
+      <div className="rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="bg-gray-50">
+              <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    className="text-gray-700 font-semibold py-4"
-                  >
+                  <TableHead key={header.id}>
                     {flexRender(
                       header.column.columnDef.header,
                       header.getContext()
@@ -116,10 +146,11 @@ export function JobTable({ onEdit, onDelete }: JobTableProps) {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className="hover:bg-gray-50 border-b border-gray-100"
+                  data-state={row.getIsSelected() && "selected"}
+                  className="border-b transition-colors hover:bg-muted/50"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-3 text-gray-800">
+                    <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -132,7 +163,7 @@ export function JobTable({ onEdit, onDelete }: JobTableProps) {
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center text-gray-500"
+                  className="h-24 text-center"
                 >
                   No jobs found
                 </TableCell>

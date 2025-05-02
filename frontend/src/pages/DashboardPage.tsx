@@ -1,10 +1,15 @@
 import { useJobStore } from "../store/useJobStore";
 import { JobTable } from "../components/JobTable";
-
 import type { Job } from "../types";
+import { useEffect } from "react";
 
 export function DashboardPage() {
   const { deleteJob } = useJobStore();
+
+  // Enable dark mode
+  useEffect(() => {
+    document.documentElement.classList.add("dark");
+  }, []);
 
   const handleEdit = (job: Job) => {
     alert(`Edit clicked for ${job.company}`);
@@ -18,8 +23,15 @@ export function DashboardPage() {
   };
 
   return (
-    <div className="p-4">
-      <JobTable onEdit={handleEdit} onDelete={handleDelete} />
+    <div className="min-h-screen bg-background">
+      <header className="border-b">
+        <div className="flex items-center justify-between p-4">
+          <h1 className="text-2xl font-bold">ApplyFlow</h1>
+        </div>
+      </header>
+      <main className="flex-1 h-full">
+        <JobTable onEdit={handleEdit} onDelete={handleDelete} />
+      </main>
     </div>
   );
 }
