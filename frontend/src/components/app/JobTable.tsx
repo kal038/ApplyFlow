@@ -1,11 +1,11 @@
-import { useJobStore } from "../store/useJobStore";
+import { useJobStore } from "@/store/useJobStore";
 import {
   getCoreRowModel,
   useReactTable,
   ColumnDef,
   flexRender,
 } from "@tanstack/react-table";
-import type { Job } from "../types";
+import type { Job } from "@/types";
 import {
   Table,
   TableHeader,

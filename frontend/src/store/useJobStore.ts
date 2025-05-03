@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import type { Job } from "../types";
+import type { Job } from "@/types";
 
 interface JobStore {
   jobs: Job[];

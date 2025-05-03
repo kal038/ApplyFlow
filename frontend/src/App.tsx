@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { DashboardPage } from "./pages/DashboardPage";
+import { DashboardPage } from "@/pages/DashboardPage";
 
 function App() {
   const [apiHealth, setApiHealth] = useState<string>("");
