@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import passport from "passport";
-import { AuthRequest, AuthUser } from "../types";
+import { AuthUser } from "../types";
 import { findUserByEmail, createUser } from "../services/userService";
 import { signToken } from "../utils/jwt";
 import { AppError } from "../utils/AppError";
@@ -35,6 +35,7 @@ export function signupHandler(req: Request, res: Response) {
 }
 
 export function loginHandler(req: Request, res: Response, next: NextFunction) {
+  //let passport handle the request parsing and authentication
   passport.authenticate("local", (err: any, user: any, info: any) => {
     if (err || !user) return res.status(401).json({ message: info?.message });
     const token = signToken(user);

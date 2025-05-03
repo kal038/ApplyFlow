@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/store/useAuthStore";
-import { set } from "date-fns";
 
 export function SignupPage() {
   const [email, setEmail] = useState("");
@@ -13,7 +12,7 @@ export function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
+  const signup = useAuthStore((state) => state.signup);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,25 +29,11 @@ export function SignupPage() {
       setError("Passwords do not match");
       return;
     }
-
     try {
-      const response = await fetch("/api/v1/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || "Signup failed");
-      }
-
-      const user = await response.json();
-      login(user);
+      await signup(email, password);
       navigate("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Signup failed");
+      setError(err instanceof Error ? err.message : "An error occurred");
     }
   };
 
