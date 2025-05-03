@@ -16,25 +16,11 @@ export function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
     try {
-      const response = await fetch("/api/v1/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || "Login failed");
-      }
-
-      const user = await response.json();
-      login(user);
+      await login(email, password);
       navigate("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      setError(err instanceof Error ? err.message : "An error occurred");
     }
   };
 
