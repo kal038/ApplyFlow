@@ -8,7 +8,7 @@ import {
 } from "@/services/jobService";
 import { LineJob } from "@/types/index";
 import { generateJobId } from "@/utils/generateJobId";
-import { AuthUser } from "../types/index";
+import { AuthUser } from "@/types/index";
 import { AppError } from "@/utils/AppError";
 import { assertOwnership } from "@/utils/assertOwnership";
 

@@ -1,6 +1,6 @@
-import { useJobStore } from "../store/useJobStore";
-import { JobTable } from "../components/JobTable";
-import type { Job } from "../types";
+import { useJobStore } from "@/store/useJobStore";
+import { JobTable } from "@/components/app/JobTable";
+import type { Job } from "@/types";
 import { useEffect } from "react";
 
 export function DashboardPage() {
