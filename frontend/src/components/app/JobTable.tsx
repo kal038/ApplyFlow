@@ -19,13 +19,18 @@ import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 
 interface JobTableProps {
+  jobs: Job[];
   onEdit: (job: Job) => void;
   onDelete: (job_id: string) => void;
+  isDemo?: boolean;
 }
 
-export function JobTable({ onEdit, onDelete }: JobTableProps) {
-  const jobs = useJobStore((state) => state.jobs);
-
+export function JobTable({
+  jobs,
+  onEdit,
+  onDelete,
+  isDemo = false,
+}: JobTableProps) {
   const columns: ColumnDef<Job>[] = [
     {
       id: "select",
@@ -117,12 +122,16 @@ export function JobTable({ onEdit, onDelete }: JobTableProps) {
             Job Applications
           </h2>
           <p className="text-muted-foreground">
-            Track all your job applications in one place
+            {isDemo
+              ? "Example of how your applications will be displayed"
+              : "Track all your job applications in one place"}
           </p>
         </div>
-        <div className="flex items-center space-x-2">
-          {/* User profile or actions could go here */}
-        </div>
+        {!isDemo && (
+          <div className="flex items-center space-x-2">
+            {/* User profile or actions could go here */}
+          </div>
+        )}
       </div>
 
       <div className="rounded-md border">

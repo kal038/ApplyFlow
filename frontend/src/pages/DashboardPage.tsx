@@ -4,6 +4,7 @@ import type { Job } from "@/types";
 import { useEffect } from "react";
 
 export function DashboardPage() {
+  const jobs = useJobStore((state) => state.jobs);
   const { deleteJob } = useJobStore();
 
   // Enable dark mode
@@ -30,7 +31,7 @@ export function DashboardPage() {
         </div>
       </header>
       <main className="flex-1 h-full">
-        <JobTable onEdit={handleEdit} onDelete={handleDelete} />
+        <JobTable jobs={jobs} onEdit={handleEdit} onDelete={handleDelete} />
       </main>
     </div>
   );
