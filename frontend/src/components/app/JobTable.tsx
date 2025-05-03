@@ -122,9 +122,7 @@ export function JobTable({
             Job Applications
           </h2>
           <p className="text-muted-foreground">
-            {isDemo
-              ? "Example of how your applications will be displayed"
-              : "Track all your job applications in one place"}
+            {"Track all your job applications in one place"}
           </p>
         </div>
         {!isDemo && (

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { DashboardPage } from "@/pages/DashboardPage";
+import { LandingPage } from "@/pages/LandingPage";
 
 function App() {
   const [apiHealth, setApiHealth] = useState<string>("");
@@ -29,7 +30,8 @@ function App() {
     <Router>
       <div className="min-h-screen w-full bg-background">
         <Routes>
-          <Route path="/" element={<DashboardPage />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
         </Routes>
 
         {/* API Status indicator */}
