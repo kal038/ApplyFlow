@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { DashboardPage } from "./pages/DashboardPage";
 
 function App() {
-  const [count, setCount] = useState(0);
   const [apiHealth, setApiHealth] = useState<string>("");
 
   useEffect(() => {
@@ -22,26 +20,31 @@ function App() {
     fetchHealth();
   }, []);
 
+  // Add dark mode to entire app
+  useEffect(() => {
+    document.documentElement.classList.add("dark");
+  }, []);
+
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <Router>
+      <div className="min-h-screen w-full bg-background">
+        <Routes>
+          <Route path="/" element={<DashboardPage />} />
+        </Routes>
+
+        {/* API Status indicator */}
+        {apiHealth && (
+          <div className="fixed bottom-4 right-4 px-3 py-2 rounded-md bg-muted text-xs">
+            API:{" "}
+            {apiHealth.includes("Error") ? (
+              <span className="text-red-400">{apiHealth}</span>
+            ) : (
+              <span className="text-green-400">Connected</span>
+            )}
+          </div>
+        )}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card"></div>
-      <button onClick={() => setCount((count) => count + 1)}>
-        count is {count}
-      </button>
-      <p>
-        Edit <code>src/App.tsx</code> and save to test HMR
-      </p>
-      <p>API Health: {apiHealth}</p>
-    </>
+    </Router>
   );
 }
 
