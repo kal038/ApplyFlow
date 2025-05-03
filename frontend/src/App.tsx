@@ -2,9 +2,13 @@ import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { LandingPage } from "@/pages/LandingPage";
+import { SignupPage } from "@/pages/SignupPage";
+import { LoginPage } from "@/pages/LoginPage";
+import { useAuthStore } from "@/store/useAuthStore";
 
 function App() {
   const [apiHealth, setApiHealth] = useState<string>("");
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   useEffect(() => {
     const fetchHealth = async () => {
@@ -31,11 +35,13 @@ function App() {
       <div className="min-h-screen w-full bg-background">
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
         </Routes>
 
-        {/* API Status indicator */}
-        {apiHealth && (
+        {/* API Status indicator - only shown when authenticated */}
+        {isAuthenticated && apiHealth && (
           <div className="fixed bottom-4 right-4 px-3 py-2 rounded-md bg-muted text-xs">
             API:{" "}
             {apiHealth.includes("Error") ? (

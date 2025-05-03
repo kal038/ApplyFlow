@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { JobTable } from "@/components/app/JobTable";
 import type { Job } from "@/types";
+import { useNavigate } from "react-router-dom";
 
 export function LandingPage() {
+  const navigate = useNavigate();
   const demoJobs: Job[] = [
     {
       job_id: "demo-1",
@@ -10,7 +12,7 @@ export function LandingPage() {
       title: "Full Stack Developer",
       status: "Interview",
       applied_date: "2025-05-01",
-      notes: "Second round scheduled",
+      notes: "Application submitted",
     },
     {
       job_id: "demo-2",
@@ -18,13 +20,13 @@ export function LandingPage() {
       title: "Frontend Engineer",
       status: "Applied",
       applied_date: "2025-04-28",
-      notes: "Application submitted",
+      notes: "Interview Scheduled",
     },
     {
       job_id: "demo-3",
       company: "Data Systems",
       title: "Software Engineer",
-      status: "Awaiting Offer",
+      status: "Follow Up",
       applied_date: "2025-04-15",
       notes: "Reviewing offer letter",
     },
@@ -49,7 +51,11 @@ export function LandingPage() {
           Organize applications, track progress, take action, and land your
           dream job with ApplyFlow
         </p>
-        <Button size="lg" className="text-lg px-8">
+        <Button
+          size="lg"
+          className="text-lg px-8"
+          onClick={() => navigate("/signup")}
+        >
           Sign Up Free
         </Button>
       </div>
