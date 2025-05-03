@@ -19,13 +19,31 @@ import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 
 interface JobTableProps {
+  jobs: Job[];
   onEdit: (job: Job) => void;
   onDelete: (job_id: string) => void;
+  isDemo?: boolean;
 }
 
-export function JobTable({ onEdit, onDelete }: JobTableProps) {
-  const jobs = useJobStore((state) => state.jobs);
+const getStatusStyles = (status: string) => {
+  const styles = {
+    Applied: "bg-blue-400/10 text-blue-400 ring-blue-400/30",
+    Interview: "bg-yellow-400/10 text-yellow-400 ring-yellow-400/30",
+    Offer: "bg-green-400/10 text-green-400 ring-green-400/30",
+    Rejected: "bg-red-400/10 text-red-400 ring-red-400/30",
+    "Follow Up": "bg-purple-400/10 text-purple-400 ring-purple-400/30",
+    default: "bg-gray-400/10 text-gray-400 ring-gray-400/30",
+  };
 
+  return styles[status as keyof typeof styles] || styles.default;
+};
+
+export function JobTable({
+  jobs,
+  onEdit,
+  onDelete,
+  isDemo = false,
+}: JobTableProps) {
   const columns: ColumnDef<Job>[] = [
     {
       id: "select",
@@ -65,17 +83,9 @@ export function JobTable({ onEdit, onDelete }: JobTableProps) {
         return (
           <div className="flex w-[110px] items-center">
             <span
-              className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
-                status === "Applied"
-                  ? "bg-blue-400/10 text-blue-400 ring-blue-400/30"
-                  : status === "Interview"
-                  ? "bg-yellow-400/10 text-yellow-400 ring-yellow-400/30"
-                  : status === "Offer"
-                  ? "bg-green-400/10 text-green-400 ring-green-400/30"
-                  : status === "Rejected"
-                  ? "bg-red-400/10 text-red-400 ring-red-400/30"
-                  : "bg-gray-400/10 text-gray-400 ring-gray-400/30"
-              }`}
+              className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${getStatusStyles(
+                status
+              )}`}
             >
               {status}
             </span>
@@ -117,12 +127,14 @@ export function JobTable({ onEdit, onDelete }: JobTableProps) {
             Job Applications
           </h2>
           <p className="text-muted-foreground">
-            Track all your job applications in one place
+            {"Track all your job applications in one place"}
           </p>
         </div>
-        <div className="flex items-center space-x-2">
-          {/* User profile or actions could go here */}
-        </div>
+        {!isDemo && (
+          <div className="flex items-center space-x-2">
+            {/* User profile or actions could go here */}
+          </div>
+        )}
       </div>
 
       <div className="rounded-md border">
