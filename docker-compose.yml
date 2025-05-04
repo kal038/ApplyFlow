@@ -6,10 +6,11 @@ services:
       - .env
 
   nginx:
-    image: nginx:stable-alpine #Use an image from Docker Hub
+    image: nginx:stable-alpine
     ports:
-      - "80:80" #connect host's port 80 to the container's port 80
+      - "80:80"
     volumes:
+      - ./frontend-dist:/usr/share/nginx/html
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
-      - backend #wait for the backend to be up (not necessarily ready)
+      - backend
