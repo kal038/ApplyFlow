@@ -58,3 +58,28 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/applyflow-frontend:latest,${{ secrets.DOCKERHUB_USERNAME }}/applyflow-frontend:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # Deploy to EC2 (only on main branch)
+      - name: Deploy to EC2
+        if: github.ref == 'refs/heads/main'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Login to Docker Hub
+            echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+            # Stop and remove existing containers
+            docker-compose down || true
+
+            # Pull latest images
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/applyflow-backend:latest
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/applyflow-frontend:latest
+
+            # Start the containers with the new images
+            docker-compose up -d
+
+            # Clean up unused images
+            docker image prune -af
