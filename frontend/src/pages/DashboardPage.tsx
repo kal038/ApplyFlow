@@ -12,7 +12,7 @@ import { JobFormModal } from "@/components/app/JobFormModal";
 
 export function DashboardPage() {
   const jobs = useJobStore((state) => state.jobs);
-  const { fetchJobs, addJob, deleteJob } = useJobStore();
+  const { fetchJobs, addJob, deleteJob, updateJob } = useJobStore();
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -81,7 +81,13 @@ export function DashboardPage() {
     try {
       if (job.job_id) {
         // This is an existing job being edited
-        // await updateJob(job.job_id, job);
+        await updateJob(job.job_id, {
+          company: job.company,
+          title: job.title,
+          status: job.status,
+          applied_date: job.applied_date,
+          notes: job.notes,
+        });
       } else {
         // This is a new job being created with optimistic update
         await addJob({

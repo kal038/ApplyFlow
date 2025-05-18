@@ -8,6 +8,7 @@ interface JobStore {
   fetchJobs: () => Promise<void>;
   addJob: (job: Omit<Job, "job_id">) => Promise<void>;
   deleteJob: (job_id: string) => Promise<void>;
+  updateJob: (job_id: string, updatedFields: Partial<Job>) => Promise<void>;
 }
 
 export const useJobStore = create<JobStore>()(
@@ -90,6 +91,35 @@ export const useJobStore = create<JobStore>()(
         } catch (error) {
           console.error("Error deleting job:", error);
           // Job remains removed from UI even if delete fails
+        }
+      },
+
+      updateJob: async (job_id, updatedFields) => {
+        // Optimistically update the job in UI
+        set(
+          (state) => ({
+            jobs: state.jobs.map((job) =>
+              job.job_id === job_id ? { ...job, ...updatedFields } : job
+            ),
+          }),
+          false,
+          "updateJobOptimistic"
+        );
+
+        // Send update to API
+        try {
+          await fetch(`/api/v1/jobs/${job_id}`, {
+            method: "PUT", // or PATCH depending on your API
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updatedFields),
+            credentials: "include",
+          });
+
+          // We're not updating the state again since we've already done the optimistic update
+        } catch (error) {
+          console.error("Error updating job:", error);
+          // Note: In a production app, you might want to revert the optimistic update on error
+          // For simplicity, we'll leave the UI showing the updated state
         }
       },
     }),

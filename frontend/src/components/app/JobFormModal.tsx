@@ -4,6 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Job, JobStatus } from "@/types";
 
+/*
+Used for adding and editing job entries in the Job Table.
+This modal is displayed when the user clicks on the "Add Job" or "Edit" button.
+*/
+
 interface JobFormModalProps {
   job: Partial<Job>;
   onSave: (job: Partial<Job>) => void;
