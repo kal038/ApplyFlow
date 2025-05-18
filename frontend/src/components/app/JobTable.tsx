@@ -122,14 +122,7 @@ export function JobTable({
   return (
     <div className="container py-8 md:flex flex-col space-y-8">
       <div className="flex items-center justify-between space-y-2">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">
-            Job Applications
-          </h2>
-          <p className="text-muted-foreground">
-            {"Track all your job applications in one place"}
-          </p>
-        </div>
+        <div></div>
         {!isDemo && (
           <div className="flex items-center space-x-2">
             {/* User profile or actions could go here */}
