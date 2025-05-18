@@ -17,6 +17,7 @@ export function DashboardPage() {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentJob, setCurrentJob] = useState<Partial<Job> | null>(null);
+  const [jobToDelete, setJobToDelete] = useState<string | null>(null);
 
   // Fetch jobs when component mounts
   useEffect(() => {
@@ -62,9 +63,18 @@ export function DashboardPage() {
   };
 
   const handleDelete = (job_id: string) => {
-    if (confirm("Delete this job?")) {
-      deleteJob(job_id);
+    setJobToDelete(job_id);
+  };
+
+  const confirmDelete = () => {
+    if (jobToDelete) {
+      deleteJob(jobToDelete);
+      setJobToDelete(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setJobToDelete(null);
   };
 
   const handleSaveJob = async (job: Partial<Job>) => {
@@ -120,6 +130,27 @@ export function DashboardPage() {
           onSave={handleSaveJob}
           onCancel={() => setIsModalOpen(false)}
         />
+      )}
+
+      {jobToDelete && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h3 className="text-xl font-bold mb-4">Delete Job</h3>
+            <p className="mb-6">Are you sure you want to delete this job?</p>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={cancelDelete}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={confirmDelete}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
