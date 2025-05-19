@@ -4,13 +4,25 @@ import { useNavigate } from "react-router-dom";
 import { JobTable } from "@/components/app/JobTable";
 import { Button } from "@/components/ui/button";
 import type { Job } from "@/types";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Plus } from "lucide-react";
+
+// You'll need to create this modal component
+import { JobFormModal } from "@/components/app/JobFormModal";
 
 export function DashboardPage() {
   const jobs = useJobStore((state) => state.jobs);
-  const { deleteJob } = useJobStore();
+  const { fetchJobs, addJob, deleteJob, updateJob } = useJobStore();
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentJob, setCurrentJob] = useState<Partial<Job> | null>(null);
+  const [jobToDelete, setJobToDelete] = useState<string | null>(null);
+
+  // Fetch jobs when component mounts
+  useEffect(() => {
+    fetchJobs().catch(console.error);
+  }, [fetchJobs]);
 
   // Enable dark mode
   useEffect(() => {
@@ -33,14 +45,65 @@ export function DashboardPage() {
     }
   };
 
+  const handleAddJob = () => {
+    // Don't set a job_id at all when creating a new job
+    setCurrentJob({
+      company: "",
+      title: "",
+      status: "Applied",
+      applied_date: new Date().toISOString().split("T")[0],
+      notes: "",
+    });
+    setIsModalOpen(true);
+  };
+
   const handleEdit = (job: Job) => {
-    alert(`Edit clicked for ${job.company}`);
-    // later → open modal
+    setCurrentJob(job);
+    setIsModalOpen(true);
   };
 
   const handleDelete = (job_id: string) => {
-    if (confirm("Delete this job?")) {
-      deleteJob(job_id);
+    setJobToDelete(job_id);
+  };
+
+  const confirmDelete = () => {
+    if (jobToDelete) {
+      deleteJob(jobToDelete);
+      setJobToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setJobToDelete(null);
+  };
+
+  const handleSaveJob = async (job: Partial<Job>) => {
+    try {
+      if (job.job_id) {
+        // This is an existing job being edited
+        await updateJob(job.job_id, {
+          company: job.company,
+          title: job.title,
+          status: job.status,
+          applied_date: job.applied_date,
+          notes: job.notes,
+        });
+      } else {
+        // This is a new job being created with optimistic update
+        await addJob({
+          company: job.company || "",
+          title: job.title || "",
+          status: job.status || "Applied",
+          applied_date:
+            job.applied_date || new Date().toISOString().split("T")[0],
+          notes: job.notes || "",
+        });
+      }
+      setIsModalOpen(false);
+
+      // No need to fetchJobs() here since we're using optimistic updates
+    } catch (error) {
+      console.error("Error saving job:", error);
     }
   };
 
@@ -55,8 +118,46 @@ export function DashboardPage() {
         </div>
       </header>
       <main className="flex-1 h-full">
-        <JobTable jobs={jobs} onEdit={handleEdit} onDelete={handleDelete} />
+        <div className="container py-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-3xl font-bold">Your Jobs</h2>
+            <Button onClick={handleAddJob} className="flex items-center gap-2">
+              <Plus className="h-4 w-4" /> Add Job
+            </Button>
+          </div>
+
+          <JobTable jobs={jobs} onEdit={handleEdit} onDelete={handleDelete} />
+        </div>
       </main>
+
+      {isModalOpen && currentJob && (
+        <JobFormModal
+          job={currentJob}
+          onSave={handleSaveJob}
+          onCancel={() => setIsModalOpen(false)}
+        />
+      )}
+
+      {jobToDelete && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h3 className="text-xl font-bold mb-4">Delete Job</h3>
+            <p className="mb-6">Are you sure you want to delete this job?</p>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={cancelDelete}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={confirmDelete}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

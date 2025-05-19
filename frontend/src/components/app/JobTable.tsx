@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Trash, Edit } from "lucide-react";
 
 interface JobTableProps {
   jobs: Job[];
@@ -98,15 +98,30 @@ export function JobTable({
       id: "actions",
       header: "",
       cell: ({ row }) => (
-        <div className="flex justify-end">
+        <div className="flex justify-end space-x-2">
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => onEdit(row.original)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(row.original);
+            }}
             className="h-8 w-8 p-0"
           >
-            <span className="sr-only">Open menu</span>
-            <MoreHorizontal className="h-4 w-4" />
+            <span className="sr-only">Edit</span>
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(row.original.job_id);
+            }}
+            className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/20"
+          >
+            <span className="sr-only">Delete</span>
+            <Trash className="h-4 w-4" />
           </Button>
         </div>
       ),
@@ -122,14 +137,7 @@ export function JobTable({
   return (
     <div className="container py-8 md:flex flex-col space-y-8">
       <div className="flex items-center justify-between space-y-2">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">
-            Job Applications
-          </h2>
-          <p className="text-muted-foreground">
-            {"Track all your job applications in one place"}
-          </p>
-        </div>
+        <div></div>
         {!isDemo && (
           <div className="flex items-center space-x-2">
             {/* User profile or actions could go here */}
