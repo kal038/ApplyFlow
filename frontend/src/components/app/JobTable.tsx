@@ -17,11 +17,13 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Trash, Edit } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface JobTableProps {
   jobs: Job[];
   onEdit: (job: Job) => void;
   onDelete: (job_id: string) => void;
+  onSelectionChange?: (ids: string[]) => void; // NEW
   isDemo?: boolean;
 }
 
@@ -42,8 +44,12 @@ export function JobTable({
   jobs,
   onEdit,
   onDelete,
+  onSelectionChange,
   isDemo = false,
 }: JobTableProps) {
+  // NEW: track selection state externally so parent can react
+  const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
+
   const columns: ColumnDef<Job>[] = [
     {
       id: "select",
@@ -56,6 +62,7 @@ export function JobTable({
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
           className="translate-y-[2px]"
+          disabled={isDemo}
         />
       ),
       cell: ({ row }) => (
@@ -64,6 +71,7 @@ export function JobTable({
           onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="Select row"
           className="translate-y-[2px]"
+          disabled={isDemo}
         />
       ),
     },
@@ -107,6 +115,7 @@ export function JobTable({
               onEdit(row.original);
             }}
             className="h-8 w-8 p-0"
+            disabled={isDemo}
           >
             <span className="sr-only">Edit</span>
             <Edit className="h-4 w-4" />
@@ -119,6 +128,7 @@ export function JobTable({
               onDelete(row.original.job_id);
             }}
             className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/20"
+            disabled={isDemo}
           >
             <span className="sr-only">Delete</span>
             <Trash className="h-4 w-4" />
@@ -132,7 +142,18 @@ export function JobTable({
     data: jobs,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    state: { rowSelection },
+    onRowSelectionChange: setRowSelection,
+    getRowId: (row) => row.job_id, // stable key
+    enableRowSelection: true,
   });
+
+  // NEW: notify parent on selection change
+  useEffect(() => {
+    if (!onSelectionChange) return;
+    const ids = table.getSelectedRowModel().rows.map((r) => r.original.job_id);
+    onSelectionChange(ids);
+  }, [rowSelection, onSelectionChange, table]);
 
   return (
     <div className="container py-8 md:flex flex-col space-y-8">

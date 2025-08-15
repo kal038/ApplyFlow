@@ -5,7 +5,7 @@ import { JobTable } from "@/components/app/JobTable";
 import { Button } from "@/components/ui/button";
 import type { Job } from "@/types";
 import { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 
 // You'll need to create this modal component
 import { JobFormModal } from "@/components/app/JobFormModal";
@@ -18,6 +18,8 @@ export function DashboardPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentJob, setCurrentJob] = useState<Partial<Job> | null>(null);
   const [jobToDelete, setJobToDelete] = useState<string | null>(null);
+  const [selectedJobIds, setSelectedJobIds] = useState<string[]>([]);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
 
   // Fetch jobs when component mounts
   useEffect(() => {
@@ -77,6 +79,21 @@ export function DashboardPage() {
     setJobToDelete(null);
   };
 
+  const handleBulkDelete = () => {
+    if (selectedJobIds.length === 0) return;
+    setShowBulkDeleteConfirm(true);
+  };
+
+  const confirmBulkDelete = () => {
+    selectedJobIds.forEach((id) => deleteJob(id)); // optimistic per deleteJob
+    setSelectedJobIds([]);
+    setShowBulkDeleteConfirm(false);
+  };
+
+  const cancelBulkDelete = () => {
+    setShowBulkDeleteConfirm(false);
+  };
+
   const handleSaveJob = async (job: Partial<Job>) => {
     try {
       if (job.job_id) {
@@ -126,7 +143,35 @@ export function DashboardPage() {
             </Button>
           </div>
 
-          <JobTable jobs={jobs} onEdit={handleEdit} onDelete={handleDelete} />
+          <JobTable
+            jobs={jobs}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onSelectionChange={setSelectedJobIds} // NEW
+          />
+
+          {selectedJobIds.length > 0 && (
+            <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 bg-card border rounded-full shadow-lg pl-4 pr-3 py-2">
+              <span className="text-sm">{selectedJobIds.length} selected</span>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleBulkDelete}
+                className="h-8 gap-1"
+              >
+                <Trash className="h-4 w-4" />
+                Delete
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedJobIds([])}
+                className="h-8"
+              >
+                Clear
+              </Button>
+            </div>
+          )}
         </div>
       </main>
 
@@ -150,6 +195,30 @@ export function DashboardPage() {
               <Button
                 variant="destructive"
                 onClick={confirmDelete}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showBulkDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h3 className="text-xl font-bold mb-4">Delete Selected Jobs</h3>
+            <p className="mb-6">
+              Delete {selectedJobIds.length} selected job
+              {selectedJobIds.length > 1 ? "s" : ""}? This cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={cancelBulkDelete}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={confirmBulkDelete}
                 className="bg-red-600 hover:bg-red-700"
               >
                 Delete
