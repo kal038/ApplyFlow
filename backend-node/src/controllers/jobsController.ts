@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { z } from "zod";
 import {
   getJobsByUserId as getJobsByUserIdDynamo,
   getJobById as getJobByJobIdDynamo,
@@ -12,130 +13,195 @@ import { AuthUser } from "@/types/index";
 import { AppError } from "@/utils/AppError";
 import { assertOwnership } from "@/utils/assertOwnership";
 
-/*
-Controller functions, deal with request and response objects
-1. getAllJobs (get all jobs for a certain user)
-2. getJobById (get a job by job_id)
-3. createJob (create a new job, generate random job_id with helper)
-4. updateJob (update a job with job_id, check on body)
-5. deleteJob (delete a job with job_id)
-*/
+// Zod schemas for validation
+const createJobSchema = z.object({
+  company: z
+    .string()
+    .min(1, "Company name is required")
+    .max(100, "Company name too long"),
+  title: z
+    .string()
+    .min(1, "Job title is required")
+    .max(100, "Job title too long"),
+  status: z.enum(
+    ["applied", "interviewing", "offer", "rejected", "withdrawn"],
+    {
+      errorMap: () => ({ message: "Invalid status value" }),
+    }
+  ),
+  applied_date: z.string().datetime("Invalid date format"),
+  notes: z.string().max(1000, "Notes too long").optional().default(""),
+});
+
+const updateJobSchema = z
+  .object({
+    company: z.string().min(1).max(100).optional(),
+    title: z.string().min(1).max(100).optional(),
+    status: z
+      .enum(["applied", "interviewing", "offer", "rejected", "withdrawn"])
+      .optional(),
+    applied_date: z.string().datetime().optional(),
+    notes: z.string().max(1000).optional(),
+  })
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "At least one field must be provided for update",
+  });
+
+const jobParamsSchema = z.object({
+  job_id: z.string().min(1, "Job ID is required"),
+});
 
 /**
  * Retrieves all jobs associated with an authenticated user.
- *
- * @param request - Express Request object containing authenticated user information
- * @param response - Express Response object to send back the jobs data
- * @throws {AppError} If retrieving jobs from DynamoDB fails
- * @returns Promise<void> - Returns void, sends JSON response with jobs data
  */
 export const getAllJobs = async (
   request: Request,
   response: Response
 ): Promise<void> => {
-  const authUser = request.user as AuthUser; //telling Ts that request.user is of type AuthUser
-  //extract user_id from request confidently
-  const { user_id } = authUser;
   try {
+    const authUser = request.user as AuthUser;
+    const { user_id } = authUser;
+
     const jobs = await getJobsByUserIdDynamo(user_id);
-    response.status(200).json(jobs);
+    response.status(200).json({ jobs, count: jobs.length });
   } catch (error) {
+    console.error("Error in getAllJobs:", error);
     throw new AppError("Error retrieving jobs", 500);
   }
 };
 
 /**
- * Create job with authenticated user information.
- *
- * @param request - Express Request object containing authenticated user information
- * @param response - Express Response object to send back the jobs data
- * @throws {AppError} If retrieving jobs from DynamoDB fails
- * @returns Promise<void> - Returns void, sends JSON response with new job data
+ * Create job with authenticated user information and validated data.
  */
 export const createJob = async (
   request: Request,
   response: Response
 ): Promise<void> => {
-  const authUser = request.user as AuthUser; //telling Ts that request.user is of type AuthUser
-  //extract user_id from request confidently
-  const { user_id } = authUser;
-  //extract job data from request body
-  const jobData = request.body;
-  //create new job object
-  const job_id = generateJobId();
-  const newJob: LineJob = {
-    job_id: job_id,
-    user_id: user_id,
-    company: jobData.company,
-    title: jobData.title,
-    status: jobData.status,
-    applied_date: jobData.applied_date,
-    notes: jobData.notes,
-  };
-  //call createJob function from dynamo service with async/await
   try {
+    // Validate request body
+    const validatedData = createJobSchema.parse(request.body);
+
+    const authUser = request.user as AuthUser;
+    const { user_id } = authUser;
+
+    const job_id = generateJobId();
+    const newJob: LineJob = {
+      job_id,
+      user_id,
+      ...validatedData,
+    };
+
     await createJobDynamo(newJob);
-    response.status(201).json(newJob);
+    response.status(201).json({ job: newJob });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      const errorMessages = error.errors.map((err) => ({
+        field: err.path.join("."),
+        message: err.message,
+      }));
+      response.status(400).json({
+        error: "Validation failed",
+        details: errorMessages,
+      });
+      return;
+    }
+
+    console.error("Error in createJob:", error);
     throw new AppError("Error creating job", 500);
   }
 };
 
 /**
- * Delete job by job id, have to confirm job exists and is owned by user
- *
- * @param request - Express Request object containing authenticated user information
- * @param response - Express Response object to send back the jobs data
- * @throws {AppError} If retrieving jobs from DynamoDB fails
- * @returns Promise<void> - Returns void, sends JSON response with new job data
+ * Delete job by job id, with validation and ownership checks.
  */
 export const deleteJob = async (
   request: Request,
   response: Response
 ): Promise<void> => {
-  const authUser = request.user as AuthUser;
-  const userId = authUser.user_id;
-  const { job_id } = request.params;
-
   try {
+    // Validate params
+    const { job_id } = jobParamsSchema.parse(request.params);
+
+    const authUser = request.user as AuthUser;
+    const userId = authUser.user_id;
+
     const job = await getJobByJobIdDynamo(job_id);
 
     if (!job) {
-      throw new AppError("Job not found", 404);
+      response.status(404).json({ error: "Job not found" });
+      return;
     }
 
     assertOwnership(job, userId);
-
-    await deleteJobDynamo(job_id); // delete from db
+    await deleteJobDynamo(job_id);
 
     response.status(204).send();
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      response.status(400).json({
+        error: "Invalid job ID format",
+      });
+      return;
+    }
+
+    // Handle known AppErrors (like ownership issues)
+    if (error instanceof AppError) {
+      response.status(error.statusCode).json({ error: error.message });
+      return;
+    }
+
+    console.error("Error in deleteJob:", error);
     throw new AppError("Error deleting job", 500);
   }
 };
 
+/**
+ * Update job with validated data and ownership checks.
+ */
 export const updateJob = async (
   request: Request,
   response: Response
 ): Promise<void> => {
-  const authUser = request.user as AuthUser;
-  const userId = authUser.user_id;
-  const { job_id } = request.params;
-  const updatedFields: Partial<LineJob> = request.body;
-
   try {
+    // Validate params and body
+    const { job_id } = jobParamsSchema.parse(request.params);
+    const validatedFields = updateJobSchema.parse(request.body);
+
+    const authUser = request.user as AuthUser;
+    const userId = authUser.user_id;
+
     const job = await getJobByJobIdDynamo(job_id);
 
     if (!job) {
-      throw new AppError("Job not found", 404); // we expect this may happen in our app
+      response.status(404).json({ error: "Job not found" });
+      return;
     }
 
     assertOwnership(job, userId);
 
-    const updatedJob = await updateJobDynamo(job_id, updatedFields);
+    const updatedJob = await updateJobDynamo(job_id, validatedFields);
 
     response.status(200).json({ job: updatedJob.Attributes });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      const errorMessages = error.errors.map((err) => ({
+        field: err.path.join("."),
+        message: err.message,
+      }));
+      response.status(400).json({
+        error: "Validation failed",
+        details: errorMessages,
+      });
+      return;
+    }
+
+    // Handle known AppErrors (like ownership issues)
+    if (error instanceof AppError) {
+      response.status(error.statusCode).json({ error: error.message });
+      return;
+    }
+
+    console.error("Error in updateJob:", error);
     throw new AppError("Error updating job", 500);
   }
 };
