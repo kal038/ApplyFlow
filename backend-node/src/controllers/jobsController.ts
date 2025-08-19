@@ -91,9 +91,9 @@ export const createJob = async (
     if (error instanceof ZodError) {
       response.status(400).json({
         error: "Validation failed",
-        details: error.errors.map((e) => ({
-          path: e.path.join("."),
-          message: e.message,
+        details: error.issues.map((issue) => ({
+          path: issue.path.join("."),
+          message: issue.message,
         })),
       });
       return;
@@ -178,9 +178,9 @@ export const updateJob = async (
     if (error instanceof ZodError) {
       response.status(400).json({
         error: "Validation failed",
-        details: error.errors.map((e) => ({
-          path: e.path.join("."),
-          message: e.message,
+        details: error.issues.map((issue) => ({
+          path: issue.path.join("."),
+          message: issue.message,
         })),
       });
       return;
