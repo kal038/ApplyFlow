@@ -2,10 +2,11 @@ import { useJobStore } from "@/store/useJobStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useNavigate } from "react-router-dom";
 import { JobTable } from "@/components/app/JobTable";
-import { Button } from "@/components/ui/button";
+import { JobCard } from "@/components/app/JobCard";
 import type { Job } from "@/types";
-import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Plus, Trash } from "lucide-react";
+import { useEffect, useState } from "react";
 
 // You'll need to create this modal component
 import { JobFormModal } from "@/components/app/JobFormModal";
@@ -20,6 +21,7 @@ export function DashboardPage() {
   const [jobToDelete, setJobToDelete] = useState<string | null>(null);
   const [selectedJobIds, setSelectedJobIds] = useState<string[]>([]);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+  const [viewMode, setViewMode] = useState<"table" | "cards">("table");
 
   // Fetch jobs when component mounts
   useEffect(() => {
@@ -138,17 +140,65 @@ export function DashboardPage() {
         <div className="container py-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-3xl font-bold">Your Jobs</h2>
-            <Button onClick={handleAddJob} className="flex items-center gap-2">
-              <Plus className="h-4 w-4" /> Add Job
-            </Button>
+
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex items-center gap-2 bg-muted/5 rounded-md p-1">
+                <Button
+                  variant={viewMode === "table" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("table")}
+                >
+                  List
+                </Button>
+                <Button
+                  variant={viewMode === "cards" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("cards")}
+                >
+                  Cards
+                </Button>
+              </div>
+
+              <Button
+                onClick={handleAddJob}
+                className="flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" /> Add Job
+              </Button>
+            </div>
           </div>
 
-          <JobTable
-            jobs={jobs}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onSelectionChange={setSelectedJobIds} // NEW
-          />
+          {viewMode === "table" ? (
+            <JobTable
+              jobs={jobs}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onSelectionChange={setSelectedJobIds}
+            />
+          ) : jobs.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {jobs.map((job) => (
+                <JobCard
+                  key={job.job_id}
+                  job={job}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  isSelected={selectedJobIds.includes(job.job_id)}
+                  onToggleSelect={(job_id, selected) => {
+                    setSelectedJobIds((prev) =>
+                      selected
+                        ? [...prev, job_id]
+                        : prev.filter((id) => id !== job_id)
+                    );
+                  }}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              No jobs
+            </div>
+          )}
 
           {selectedJobIds.length > 0 && (
             <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 bg-card border rounded-full shadow-lg pl-4 pr-3 py-2">
