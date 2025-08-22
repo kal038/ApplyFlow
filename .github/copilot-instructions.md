@@ -24,10 +24,10 @@ Key files to inspect before changes
   - `frontend/src/store/useAuthStore.ts` — auth actions (login/signup/logout), persisted state
   - `frontend/src/App.tsx` — bootstraps routes and API health check
 
-How AI should respond:
+Response should comply with these rules:
 
-- Only give relevant file structures and at most boilerplate for the features that need to be implemented
-- Then give an overview of tasks that need to be completed in order for requested feature to be implemented
+- Only give relevant file structures and skeleton code (or function signatures) for the feature that needs to be implemented.
+- Then give an overview of tasks that need to be completed in order for the requested feature to be implemented along with the location that the change needs to happen in.
 
 Important architectural patterns & conventions
 
@@ -94,4 +94,3 @@ Commit message style
 
 - Use conventional commit messages: `feat(...)`, `fix(...)`, `chore(...)`, `test(...)`.
 
-If anything above is unclear or missing, tell me which area you want expanded (dev flow, auth, Zod schemas, optimistic updates, or DnD persistence) and I will iterate.

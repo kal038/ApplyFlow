@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type { Job } from "@/types";
+import { apiFetch } from "@/utils/fetchHelper";
 
 interface JobStore {
   jobs: Job[];
@@ -20,9 +21,7 @@ export const useJobStore = create<JobStore>()(
       fetchJobs: async () => {
         set({ loading: true }, false, "setLoading");
         try {
-          const response = await fetch("/api/v1/jobs", {
-            headers: { "Content-Type": "application/json" },
-          });
+          const response = await apiFetch("/api/v1/jobs");
 
           if (!response.ok) {
             throw new Error("Failed to fetch jobs");
@@ -58,9 +57,8 @@ export const useJobStore = create<JobStore>()(
 
         // Fire and forget - send to server in background
         try {
-          await fetch("/api/v1/jobs", {
+          await apiFetch("/api/v1/jobs", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(job),
           });
 
@@ -68,8 +66,13 @@ export const useJobStore = create<JobStore>()(
           // it will be replaced next time fetchJobs() is called
         } catch (error) {
           console.error("Error adding job:", error);
-          // We could remove the temp job on error, but for simplicity
-          // we'll just leave it in the UI for now
+          set(
+            (state) => ({
+              jobs: state.jobs.filter((job) => job.job_id !== tempJob.job_id)
+            }),
+            false,
+            "removeFailedTempJob"
+          );
         }
       },
 
@@ -85,7 +88,7 @@ export const useJobStore = create<JobStore>()(
 
         // Fire and forget
         try {
-          await fetch(`/api/v1/jobs/${job_id}`, {
+          await apiFetch(`/api/v1/jobs/${job_id}`, {
             method: "DELETE",
           });
         } catch (error) {
@@ -108,9 +111,8 @@ export const useJobStore = create<JobStore>()(
 
         // Send update to API
         try {
-          await fetch(`/api/v1/jobs/${job_id}`, {
-            method: "PUT", // or PATCH depending on your API
-            headers: { "Content-Type": "application/json" },
+          await apiFetch(`/api/v1/jobs/${job_id}`, {
+            method: "PUT",
             body: JSON.stringify(updatedFields),
             credentials: "include",
           });
@@ -118,8 +120,7 @@ export const useJobStore = create<JobStore>()(
           // We're not updating the state again since we've already done the optimistic update
         } catch (error) {
           console.error("Error updating job:", error);
-          // Note: In a production app, you might want to revert the optimistic update on error
-          // For simplicity, we'll leave the UI showing the updated state
+          //TLDR: revert job display if app comes back with error
         }
       },
     }),
