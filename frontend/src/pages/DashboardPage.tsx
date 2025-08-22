@@ -175,30 +175,30 @@ export function DashboardPage() {
               onDelete={handleDelete}
               onSelectionChange={setSelectedJobIds}
             />
-          ) : jobs.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {jobs.map((job) => (
-                <JobCard
-                  key={job.job_id}
-                  job={job}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  isSelected={selectedJobIds.includes(job.job_id)}
-                  onToggleSelect={(job_id, selected) => {
-                    setSelectedJobIds((prev) =>
-                      selected
-                        ? [...prev, job_id]
-                        : prev.filter((id) => id !== job_id)
-                    );
-                  }}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              No jobs
-            </div>
-          )}
+          ) : viewMode === "cards" ? (
+            jobs.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[25rem]">
+                {jobs.map((job) => (
+                  <JobCard
+                    key={job.job_id}
+                    job={job}
+                    isSelected={selectedJobIds.includes(job.job_id)}
+                    onToggleSelect={(id, selected) =>
+                      setSelectedJobIds((prev) =>
+                        selected ? [...prev, id] : prev.filter((x) => x !== id)
+                      )
+                    }
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                No jobs
+              </div>
+            )
+          ) : null}
 
           {selectedJobIds.length > 0 && (
             <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 bg-card border rounded-full shadow-lg pl-4 pr-3 py-2">
