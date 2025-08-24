@@ -9,6 +9,8 @@ export const jobSchema = z.object({
   status: z.enum(["Applied", "Interviewing", "Offer", "Rejected", "Withdrawn"]),
   applied_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), // YYYY-MM-DD format
   notes: z.string().max(1000).optional().default(""),
+  // Unix epoch milliseconds of last update; used for staleness calculations
+  last_updated_at: z.number().int().nonnegative(),
 });
 
 // Input schemas for create/update

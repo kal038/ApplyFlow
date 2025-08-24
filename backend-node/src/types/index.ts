@@ -16,6 +16,7 @@ export interface LineJob {
   status: string;
   applied_date: string;
   notes?: string;
+  last_updated_at: number; // epoch ms of last modification (create counts as update)
 }
 
 export interface AuthUser {

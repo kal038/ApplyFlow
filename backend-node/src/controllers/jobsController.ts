@@ -77,6 +77,7 @@ export const createJob = async (
       job_id: generateJobId(),
       user_id: authUser.user_id,
       ...validatedInput,
+  last_updated_at: Date.now(),
     };
 
     // Validate full job shape
@@ -160,7 +161,11 @@ export const updateJob = async (
 
     assertOwnership(job, userId);
 
-    const updatedJob = await updateJobDynamo(job_id, validatedFields);
+    // Always bump last_updated_at when updating any field
+    const updatedJob = await updateJobDynamo(job_id, {
+      ...validatedFields,
+      last_updated_at: Date.now(),
+    });
 
     // Dynamo update result should have Attributes with the updated item
     const attrs = updatedJob?.Attributes;

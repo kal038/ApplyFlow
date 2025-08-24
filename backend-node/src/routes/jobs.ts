@@ -7,10 +7,23 @@ import {
 } from "@/controllers/jobsController";
 import { authenticateJWT } from "../middleware/authenticate";
 import { validateCreateJob, validateUpdateJob } from "@/middleware/validateJob";
+import { checkStaleJob } from "@/middleware/checkStaleJob";
 
 export const router = Router();
 
 router.get("/", authenticateJWT, getAllJobs);
 router.post("/", authenticateJWT, validateCreateJob, createJob);
-router.put("/:job_id", authenticateJWT, validateUpdateJob, updateJob);
-router.delete("/:job_id", authenticateJWT, deleteJob);
+// Block updates/deletes if stale
+router.put(
+  "/:job_id",
+  authenticateJWT,
+  checkStaleJob(true),
+  validateUpdateJob,
+  updateJob
+);
+router.delete(
+  "/:job_id",
+  authenticateJWT,
+  checkStaleJob(true),
+  deleteJob
+);
