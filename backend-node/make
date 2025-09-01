@@ -1,0 +1,43 @@
+# ---- config (edit these)
+FRONT_DIR=frontend
+BACK_DIR=backend-node
+OPEN_URLS=http://localhost:3000
+
+# Detect a browser opener that works on this OS
+OPENER := $(shell command -v xdg-open >/dev/null 2>&1 && echo xdg-open || (command -v open >/dev/null 2>&1 && echo open || echo echo))
+
+# Helper: install deps if needed (portable enough for Linux + macOS)
+define maybe_install
+	@if [ ! -d $(1)/node_modules ] || [ $(1)/package-lock.json -nt $(1)/node_modules/.install-stamp ]; then \
+		echo "Installing deps in $(1)"; \
+		cd $(1) && npm ci && mkdir -p node_modules && touch node_modules/.install-stamp; \
+	else \
+		echo "Deps up-to-date in $(1)"; \
+	fi
+endef
+
+.PHONY: dev open up kill
+
+dev:
+	@$(call maybe_install,$(FRONT_DIR))
+	@$(call maybe_install,$(BACK_DIR))
+	# Start both; use tmux if available so panes are side-by-side
+	@if command -v tmux >/dev/null 2>&1; then \
+		tmux new-session -d -s dev "cd $(BACK_DIR) && npm run dev"; \
+		tmux split-window -h "cd $(FRONT_DIR) && npm run dev"; \
+		tmux select-layout tiled; \
+		tmux attach -t dev; \
+	else \
+		( cd $(BACK_DIR) && npm run dev ) & \
+		( cd $(FRONT_DIR) && npm run dev ) & \
+		wait; \
+	fi
+
+open:
+	@for u in $(OPEN_URLS); do $(OPENER) $$u >/dev/null 2>&1 || true; done
+
+up: dev open
+
+# quick helper to kill the tmux session, if you used tmux
+kill:
+	-@tmux kill-session -t dev >/dev/null 2>&1 || true
