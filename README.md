@@ -32,6 +32,13 @@ Track applications, manage progress, and land your dream job – all in one beau
 
 ---
 
+## 🧰 Environment Setup
+- Copy `backend-node/.env.example` to `backend-node/.env` and set `JWT_SECRET`, DynamoDB table names, and optional `STALE_JOB_DAYS`/`AWS_REGION`.
+- Copy `frontend/.env.example` to `frontend/.env`; adjust `VITE_API_BASE` if the API is not served from `http://localhost:3030`.
+- Run `make dev` from the repo root to install dependencies (if missing) and start both frontend and backend together.
+
+---
+
 ## 🌟 Coming Soon
 - 📊 Bi-weekly Sprint Review generator  
 - 🔔 Smart follow-up reminders  

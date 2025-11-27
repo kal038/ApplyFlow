@@ -1,12 +1,12 @@
 # ---- config (edit these)
 FRONT_DIR=frontend
 BACK_DIR=backend-node
-OPEN_URLS=http://localhost:3000
+OPEN_URLS=http://localhost:5173/
 
 # Detect a browser opener that works on this OS
 OPENER := $(shell command -v xdg-open >/dev/null 2>&1 && echo xdg-open || (command -v open >/dev/null 2>&1 && echo open || echo echo))
 
-# Helper: install deps if needed (portable enough for Linux + macOS)
+# Helper: install deps if needed 
 define maybe_install
 	@if [ ! -d $(1)/node_modules ] || [ $(1)/package-lock.json -nt $(1)/node_modules/.install-stamp ]; then \
 		echo "Installing deps in $(1)"; \
