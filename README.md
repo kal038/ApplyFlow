@@ -24,7 +24,7 @@ Track applications, manage progress, and land your dream job – all in one beau
 | Layer     | Technology                       |
 |-----------|----------------------------------|
 | Frontend  | React + Vite + TailwindCSS       |
-| Backend   | Node.js + Express + TypeScript   |
+| Backend   | Node.js + Express                |
 | Database  | Amazon DynamoDB                  |
 | Auth      | Passport.js + JWT                |
 | Hosting   | AWS EC2 + NGINX                  |
@@ -46,20 +46,5 @@ Track applications, manage progress, and land your dream job – all in one beau
 - 📈 Analytics dashboard  
 - 📄 Resume management with S3  
 
----
 
-## 🤝 Contributing
-We welcome contributions!  
-Please see our **Contributing Guidelines** for details.
 
----
-
-## 📝 License
-MIT  
-
----
-
-## 👤 Author
-Built with ❤️ by **Khoi Lam**
-
-⭐️ Star us on GitHub if this helps your job search!

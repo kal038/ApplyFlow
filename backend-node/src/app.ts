@@ -8,21 +8,7 @@ import { router as authRouter } from "@/routes/auth";
 import { router as healthRouter } from "@/routes/health";
 import { router as jobsRouter } from "@/routes/jobs";
 
-/*
- *taxonomy of the app
- *app.ts → entry point
- *server.ts → server configuration
- *config/ → configuration files
- *middleware/ → middleware functions
- *routes/ → URL & HTTP verbs
- *controllers/ → request handling logic
- *services/ → business logic & data operations & external API calls
- *utils/ → utility functions
- *types/ → type definitions
- *tests/ → unit tests
- *assets/ → static assets
- *public/ → public assets
- */
+
 
 dotenv.config();
 
