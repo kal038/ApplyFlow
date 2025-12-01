@@ -1,4 +1,4 @@
-##ApplyFlow 
+## ApplyFlow 
 
 ApplyFlow empowers job seekers to enter a state of flow in their application process.  
 Track applications, manage progress, and land your dream job – all in one beautiful, intuitive interface.
