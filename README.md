@@ -13,7 +13,10 @@ Track applications, manage progress, and land your dream job – all in one beau
 - **Modern UI**: Built with React + Tailwind for a beautiful experience  
 
 ---
+## Architechture diagram
+![Architechture](./arch_diagram.png)
 
+---
 ## Tech
 
 | Layer     | Technology                       |
