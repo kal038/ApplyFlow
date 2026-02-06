@@ -1,9 +1,11 @@
 {
     "name": "Node.js & Docker",
     "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
-    "features": {
-        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
-    },
+    "runArgs": [
+        "--platform=linux/amd64"
+    ],
+    "postCreateCommand": "apt-get update && apt-get install -y libstdc++6 libgcc-s1 libnss3 libx11-6 libxkbfile1 libxshmfence1 libglib2.0-0 && apt-get clean && rm -rf /var/lib/apt/lists/*",
+    "features": {},
     "customizations": {
         "vscode": {
             "extensions": [
@@ -11,9 +13,5 @@
                 "esbenp.prettier-vscode"
             ]
         }
-    },
-    "forwardPorts": [
-        3000,
-        5173
-    ]
+    }
 }
