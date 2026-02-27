@@ -1,4 +1,4 @@
-## ApplyFlow 
+## apply flow tracker
 
 ApplyFlow empowers job seekers to enter a state of flow in their application process.  
 Track applications, manage progress, and land your dream job – all in one beautiful, intuitive interface.
@@ -21,17 +21,15 @@ Track applications, manage progress, and land your dream job – all in one beau
 
 | Layer     | Technology                       |
 |-----------|----------------------------------|
-| Frontend  | React + TailwindCSS              |
+| Frontend  | React                            |
 | Backend   | Node                             |
 | Data      | DynamoDB + S3                    |
 | Auth      | Passport.js                      |
 
 ---
 
-## Get started
-- Copy `backend-node/.env.example` to `backend-node/.env` and set `JWT_SECRET`, DynamoDB table names, and optional `STALE_JOB_DAYS`/`AWS_REGION`.
-- Copy `frontend/.env.example` to `frontend/.env`; adjust `VITE_API_BASE` if the API is not served from `http://localhost:3030`.
-- Run `make dev` from the repo root to install dependencies (if missing) and start both frontend and backend together.
+## Getting started
+
 
 ---
 
