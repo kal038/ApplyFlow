@@ -1,9 +1,9 @@
-import { docClient } from "@/lib/db";
-import { User } from "@/types";
-import { QueryCommand, PutCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
-import { v4 as uuidv4 } from "uuid";
-import { hash } from "bcrypt";
-import dotenv from "dotenv";
+import { docClient } from '@/lib/db';
+import { User } from '@/types';
+import { QueryCommand, PutCommand, GetCommand } from '@aws-sdk/lib-dynamodb';
+import { v4 as uuidv4 } from 'uuid';
+import { hash } from 'bcrypt';
+import dotenv from 'dotenv';
 dotenv.config();
 
 /*
@@ -19,24 +19,20 @@ dotenv.config();
 //   Attributes?: User;
 // }
 
-export const findUserByEmail = async (
-  email: string
-): Promise<User | undefined> => {
+export const findUserByEmail = async (email: string): Promise<User | undefined> => {
   const params = {
-    TableName: process.env.USERS_TABLE || "Users",
-    IndexName: "email-index",
-    KeyConditionExpression: "email = :email",
+    TableName: process.env.USERS_TABLE || 'Users',
+    IndexName: 'email-index',
+    KeyConditionExpression: 'email = :email',
     ExpressionAttributeValues: {
-      ":email": email,
+      ':email': email,
     },
   };
   const { Items } = await docClient.send(new QueryCommand(params));
   return Items?.[0] as User;
 };
 
-export const findUserById = async (
-  user_id: string
-): Promise<User | undefined> => {
+export const findUserById = async (user_id: string): Promise<User | undefined> => {
   const params = {
     TableName: process.env.USERS_TABLE,
     Key: {
@@ -47,10 +43,7 @@ export const findUserById = async (
   return Item as User;
 };
 
-export const createUser = async (
-  email: string,
-  password: string
-): Promise<User> => {
+export const createUser = async (email: string, password: string): Promise<User> => {
   const user_id = uuidv4();
   const password_hash = await hash(password, 10);
   const created_at = new Date().toISOString();

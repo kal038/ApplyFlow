@@ -31,8 +31,6 @@ graph TD
 
 This architecture integrates the required AI components (Pinecone, OpenRouter), performance layers (Redis), and leverages **AWS Fargate (ECS)** for serverless container scaling.
 
-
-
 ```mermaid
 
 graph TD
@@ -55,7 +53,7 @@ graph TD
 
         Internet -->|HTTPS| ALB[Application Load Balancer]
 
-        
+
 
         subgraph "Frontend Layer"
 
@@ -65,7 +63,7 @@ graph TD
 
         end
 
-        
+
 
         subgraph "ECS Cluster"
 
@@ -79,7 +77,7 @@ graph TD
 
         end
 
-        
+
 
         subgraph "Data Layer"
 
@@ -89,7 +87,7 @@ graph TD
 
         end
 
-        
+
 
         Task1 & Task2 -->|Read/Write| DDB
 
@@ -99,7 +97,7 @@ graph TD
 
         Task1 & Task2 -->|Inference| OpenRouter
 
-        
+
 
         Stripe -->|Webhook| ALB
 

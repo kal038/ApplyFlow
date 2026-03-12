@@ -1,26 +1,26 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError('');
     try {
       await login(email, password);
-      navigate("/dashboard");
+      navigate('/dashboard');
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      setError(err instanceof Error ? err.message : 'An error occurred');
     }
   };
 
@@ -30,25 +30,20 @@ export function LoginPage() {
       <Button
         variant="outline"
         size="icon"
-        className="absolute top-4 left-4 border-2 hover:bg-secondary hover:scale-105 transition-transform"
-        onClick={() => navigate("/")}
+        className="absolute left-4 top-4 border-2 transition-transform hover:scale-105 hover:bg-secondary"
+        onClick={() => navigate('/')}
       >
         <ArrowLeft className="h-6 w-6 font-bold" />
       </Button>
 
       <div className="flex min-h-screen items-center justify-center px-4">
-        <div className="w-full max-w-sm space-y-8 border rounded-md bg-background p-6 shadow-md">
+        <div className="w-full max-w-sm space-y-8 rounded-md border bg-background p-6 shadow-md">
           <div className="text-center">
             <h2 className="text-2xl font-bold">Welcome back</h2>
-            <p className="text-muted-foreground mt-2">
-              Sign in to your account
-            </p>
+            <p className="mt-2 text-muted-foreground">Sign in to your account</p>
           </div>
 
-          <form
-            onSubmit={handleLogin}
-            className="space-y-4 border p-6 rounded-md"
-          >
+          <form onSubmit={handleLogin} className="space-y-4 rounded-md border p-6">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -75,11 +70,11 @@ export function LoginPage() {
               Sign In
             </Button>
             <div className="text-center text-sm">
-              Don't have an account?{" "}
+              Don't have an account?{' '}
               <Button
                 variant="link"
-                className="p-0 h-auto font-semibold"
-                onClick={() => navigate("/signup")}
+                className="h-auto p-0 font-semibold"
+                onClick={() => navigate('/signup')}
               >
                 Sign up
               </Button>

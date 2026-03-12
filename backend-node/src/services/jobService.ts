@@ -1,14 +1,14 @@
-import { docClient } from "@/lib/db";
+import { docClient } from '@/lib/db';
 import {
   GetCommand,
   PutCommand,
   UpdateCommand,
   DeleteCommand,
   QueryCommand,
-} from "@aws-sdk/lib-dynamodb";
-import { ReturnValue } from "@aws-sdk/client-dynamodb";
-import dotenv from "dotenv";
-import { LineJob } from "@/types";
+} from '@aws-sdk/lib-dynamodb';
+import { ReturnValue } from '@aws-sdk/client-dynamodb';
+import dotenv from 'dotenv';
+import { LineJob } from '@/types';
 dotenv.config();
 
 // Define return types for DynamoDB responses
@@ -19,18 +19,16 @@ interface DynamoDBResponse {
 }
 
 // getJobById(job_id)
-export const getJobById = async (
-  job_id: string
-): Promise<LineJob | undefined> => {
+export const getJobById = async (job_id: string): Promise<LineJob | undefined> => {
   const params = {
-    TableName: process.env.JOBS_TABLE || "ApplyFlowJobs",
+    TableName: process.env.JOBS_TABLE || 'ApplyFlowJobs',
     Key: { job_id },
   };
   try {
     const data = await docClient.send(new GetCommand(params));
     return data.Item as LineJob | undefined;
   } catch (error) {
-    console.error("Error getting job:", error);
+    console.error('Error getting job:', error);
     throw error;
   }
 };
@@ -39,11 +37,11 @@ export const getJobById = async (
 export const getJobsByUserId = async (user_id: string): Promise<LineJob[]> => {
   //define query params
   const params = {
-    TableName: process.env.JOBS_TABLE || "ApplyFlowJobs",
-    IndexName: "user-id-index", // Assuming you have a GSI on user_id, which we do
-    KeyConditionExpression: "user_id = :user_id",
+    TableName: process.env.JOBS_TABLE || 'ApplyFlowJobs',
+    IndexName: 'user-id-index', // Assuming you have a GSI on user_id, which we do
+    KeyConditionExpression: 'user_id = :user_id',
     ExpressionAttributeValues: {
-      ":user_id": user_id,
+      ':user_id': user_id,
     },
   };
   //form the query
@@ -54,14 +52,14 @@ export const getJobsByUserId = async (user_id: string): Promise<LineJob[]> => {
     const data = await docClient.send(query);
     return data.Items as LineJob[];
   } catch (error) {
-    console.error("Error getting jobs:", error);
+    console.error('Error getting jobs:', error);
     throw error;
   }
 };
 
 export const createJob = async (job: LineJob): Promise<DynamoDBResponse> => {
   const params = {
-    TableName: process.env.JOBS_TABLE || "ApplyFlowJobs",
+    TableName: process.env.JOBS_TABLE || 'ApplyFlowJobs',
     Item: job,
   };
 
@@ -71,14 +69,14 @@ export const createJob = async (job: LineJob): Promise<DynamoDBResponse> => {
     const data = await docClient.send(createQuery);
     return data as DynamoDBResponse;
   } catch (error) {
-    console.error("Error creating job:", error);
+    console.error('Error creating job:', error);
     throw error;
   }
 };
 
 export const updateJob = async (
   job_id: string,
-  job: Partial<LineJob>
+  job: Partial<LineJob>,
 ): Promise<DynamoDBResponse> => {
   // Create expression parts only for fields that exist in the update
   const updateFields: string[] = [];
@@ -95,27 +93,27 @@ export const updateJob = async (
   });
 
   const params = {
-    TableName: process.env.JOBS_TABLE || "ApplyFlowJobs",
+    TableName: process.env.JOBS_TABLE || 'ApplyFlowJobs',
     Key: { job_id },
-    UpdateExpression: `set ${updateFields.join(", ")}`,
+    UpdateExpression: `set ${updateFields.join(', ')}`,
     ExpressionAttributeNames: expressionNames,
     ExpressionAttributeValues: expressionValues,
     ReturnValues: ReturnValue.ALL_NEW,
-    ConditionExpression: "attribute_exists(job_id)",
+    ConditionExpression: 'attribute_exists(job_id)',
   };
 
   try {
     const data = await docClient.send(new UpdateCommand(params));
     return data as DynamoDBResponse;
   } catch (error) {
-    console.error("Error updating job:", error);
+    console.error('Error updating job:', error);
     throw error;
   }
 };
 
 export const deleteJob = async (job_id: string): Promise<DynamoDBResponse> => {
   const params = {
-    TableName: process.env.JOBS_TABLE || "ApplyFlowJobs",
+    TableName: process.env.JOBS_TABLE || 'ApplyFlowJobs',
     Key: { job_id },
     ReturnValues: ReturnValue.ALL_OLD,
   };
@@ -126,7 +124,7 @@ export const deleteJob = async (job_id: string): Promise<DynamoDBResponse> => {
     const data = await docClient.send(deleteQuery);
     return data as DynamoDBResponse;
   } catch (error) {
-    console.error("Error deleting job:", error);
+    console.error('Error deleting job:', error);
     throw error;
   }
 };

@@ -1,13 +1,13 @@
-import { create } from "zustand";
-import { devtools } from "zustand/middleware";
-import type { Job } from "@/types";
-import { apiFetch } from "@/utils/fetchHelper";
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import type { Job } from '@/types';
+import { apiFetch } from '@/utils/fetchHelper';
 
 interface JobStore {
   jobs: Job[];
   loading: boolean;
   fetchJobs: () => Promise<void>;
-  addJob: (job: Omit<Job, "job_id">) => Promise<void>;
+  addJob: (job: Omit<Job, 'job_id'>) => Promise<void>;
   deleteJob: (job_id: string) => Promise<void>;
   updateJob: (job_id: string, updatedFields: Partial<Job>) => Promise<void>;
 }
@@ -19,23 +19,23 @@ export const useJobStore = create<JobStore>()(
       loading: false,
 
       fetchJobs: async () => {
-        set({ loading: true }, false, "setLoading");
+        set({ loading: true }, false, 'setLoading');
         try {
-          const response = await apiFetch("/api/v1/jobs");
+          const response = await apiFetch('/api/v1/jobs');
 
           if (!response.ok) {
-            throw new Error("Failed to fetch jobs");
+            throw new Error('Failed to fetch jobs');
           }
 
           const data = await response.json();
           // The backend returns jobs directly, not in a jobs property
-          set({ jobs: Array.isArray(data) ? data : [] }, false, "fetchJobs");
+          set({ jobs: Array.isArray(data) ? data : [] }, false, 'fetchJobs');
         } catch (error) {
-          console.error("Error fetching jobs:", error);
-          set({ jobs: [] }, false, "fetchJobsError");
+          console.error('Error fetching jobs:', error);
+          set({ jobs: [] }, false, 'fetchJobsError');
           throw error;
         } finally {
-          set({ loading: false }, false, "clearLoading");
+          set({ loading: false }, false, 'clearLoading');
         }
       },
 
@@ -52,26 +52,26 @@ export const useJobStore = create<JobStore>()(
             jobs: [...state.jobs, tempJob],
           }),
           false,
-          "addJobOptimistic"
+          'addJobOptimistic',
         );
 
         // Fire and forget - send to server in background
         try {
-          await apiFetch("/api/v1/jobs", {
-            method: "POST",
+          await apiFetch('/api/v1/jobs', {
+            method: 'POST',
             body: JSON.stringify(job),
           });
 
           // We're not replacing the temp job in the UI -
           // it will be replaced next time fetchJobs() is called
         } catch (error) {
-          console.error("Error adding job:", error);
+          console.error('Error adding job:', error);
           set(
             (state) => ({
-              jobs: state.jobs.filter((job) => job.job_id !== tempJob.job_id)
+              jobs: state.jobs.filter((job) => job.job_id !== tempJob.job_id),
             }),
             false,
-            "removeFailedTempJob"
+            'removeFailedTempJob',
           );
         }
       },
@@ -83,16 +83,16 @@ export const useJobStore = create<JobStore>()(
             jobs: state.jobs.filter((job) => job.job_id !== job_id),
           }),
           false,
-          "deleteJobOptimistic"
+          'deleteJobOptimistic',
         );
 
         // Fire and forget
         try {
           await apiFetch(`/api/v1/jobs/${job_id}`, {
-            method: "DELETE",
+            method: 'DELETE',
           });
         } catch (error) {
-          console.error("Error deleting job:", error);
+          console.error('Error deleting job:', error);
           // Job remains removed from UI even if delete fails
         }
       },
@@ -102,28 +102,28 @@ export const useJobStore = create<JobStore>()(
         set(
           (state) => ({
             jobs: state.jobs.map((job) =>
-              job.job_id === job_id ? { ...job, ...updatedFields } : job
+              job.job_id === job_id ? { ...job, ...updatedFields } : job,
             ),
           }),
           false,
-          "updateJobOptimistic"
+          'updateJobOptimistic',
         );
 
         // Send update to API
         try {
           await apiFetch(`/api/v1/jobs/${job_id}`, {
-            method: "PUT",
+            method: 'PUT',
             body: JSON.stringify(updatedFields),
-            credentials: "include",
+            credentials: 'include',
           });
 
           // We're not updating the state again since we've already done the optimistic update
         } catch (error) {
-          console.error("Error updating job:", error);
+          console.error('Error updating job:', error);
           //TLDR: revert job display if app comes back with error
         }
       },
     }),
-    { name: "JobStore" }
-  )
+    { name: 'JobStore' },
+  ),
 );
