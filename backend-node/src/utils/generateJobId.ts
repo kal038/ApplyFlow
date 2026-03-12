@@ -1,4 +1,4 @@
-import { nanoid } from "nanoid";
+import { nanoid } from 'nanoid';
 
 export function generateJobId(): string {
   // Generate a unique job ID using nanoid

@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from "express";
-import { getJobById } from "@/services/jobService";
-import { AppError } from "@/utils/AppError";
-import { assertOwnership } from "@/utils/assertOwnership";
+import { Request, Response, NextFunction } from 'express';
+import { getJobById } from '@/services/jobService';
+import { AppError } from '@/utils/AppError';
+import { assertOwnership } from '@/utils/assertOwnership';
 
 // Default threshold (e.g., 3 days) can be overridden by env STALE_JOB_DAYS
 const STALE_THRESHOLD_DAYS = Number(process.env.STALE_JOB_DAYS || 3);
@@ -15,11 +15,11 @@ const MS_PER_DAY = 1000 * 60 * 60 * 24;
 export function checkStaleJob(blockOnStale = false) {
   return async (req: Request, _res: Response, next: NextFunction) => {
     const { job_id } = req.params;
-    if (!job_id) return next(new AppError("Missing job_id param", 400));
+    if (!job_id) return next(new AppError('Missing job_id param', 400));
 
     try {
       const job = await getJobById(job_id);
-      if (!job) return next(new AppError("Job not found", 404));
+      if (!job) return next(new AppError('Job not found', 404));
 
       // Ownership (requires authenticateJWT before this middleware)
       const authUser = req.user as { user_id: string } | undefined;
@@ -33,7 +33,7 @@ export function checkStaleJob(blockOnStale = false) {
       (req as any).jobIsStale = isStale;
 
       if (isStale && blockOnStale) {
-        return next(new AppError("Job is stale", 410));
+        return next(new AppError('Job is stale', 410));
       }
 
       return next();

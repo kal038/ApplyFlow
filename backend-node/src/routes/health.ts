@@ -1,7 +1,7 @@
-import { Router } from "express";
+import { Router } from 'express';
 
 export const router = Router();
 
-router.get("/", (req, res) => {
-  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+router.get('/', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });

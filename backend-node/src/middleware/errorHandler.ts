@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from "express";
-import { AppError } from "@/utils/AppError";
+import { Request, Response, NextFunction } from 'express';
+import { AppError } from '@/utils/AppError';
 
 /**
  * Error handling middleware for Express applications.
@@ -18,17 +18,17 @@ export function errorHandler(
   err: unknown, // allow for other types of errors to be thrown
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void {
   console.error(err);
 
   if (err instanceof AppError) {
     // If it's an AppError, we can use its properties
     const statusCode = err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+    const message = err.message || 'Internal Server Error';
     res.status(statusCode).json({ message });
     return;
   }
 
-  res.status(500).json({ message: "Unexpected Internal Server Error" });
+  res.status(500).json({ message: 'Unexpected Internal Server Error' });
 }

@@ -1,14 +1,12 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import cookieParser from "cookie-parser";
-import passport from "passport";
-import { errorHandler } from "@/middleware/errorHandler";
-import { router as authRouter } from "@/routes/auth";
-import { router as healthRouter } from "@/routes/health";
-import { router as jobsRouter } from "@/routes/jobs";
-
-
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
+import passport from 'passport';
+import { errorHandler } from '@/middleware/errorHandler';
+import { router as authRouter } from '@/routes/auth';
+import { router as healthRouter } from '@/routes/health';
+import { router as jobsRouter } from '@/routes/jobs';
 
 dotenv.config();
 
@@ -22,9 +20,9 @@ app.use(passport.initialize());
 // Param1: string -> API endpoint route literal
 // Param2: controller -> fn (request, response) => {parse rquest, return response}
 
-app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/health", healthRouter);
-app.use("/api/v1/jobs", jobsRouter);
+app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/health', healthRouter);
+app.use('/api/v1/jobs', jobsRouter);
 
 // Global error handler
 app.use(errorHandler);

@@ -1,3 +1,5 @@
 {
-    "makefile.configureOnOpen": false
+  "makefile.configureOnOpen": false,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true
 }

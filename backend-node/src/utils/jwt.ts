@@ -1,11 +1,11 @@
-import jwt from "jsonwebtoken";
-import { AuthUser } from "../types";
+import jwt from 'jsonwebtoken';
+import { AuthUser } from '../types';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET environment variable must be set.");
+  throw new Error('JWT_SECRET environment variable must be set.');
 }
-const EXPIRATION_TIME = "1h"; // Token expiration time
+const EXPIRATION_TIME = '1h'; // Token expiration time
 
 // JWT is just a string, generated with a secret and a payload
 // The payload is the data we want to store in the token

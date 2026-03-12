@@ -93,4 +93,3 @@ If you change behavior or response shapes
 Commit message style
 
 - Use conventional commit messages: `feat(...)`, `fix(...)`, `chore(...)`, `test(...)`.
-

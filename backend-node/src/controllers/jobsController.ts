@@ -1,23 +1,23 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
 import {
   getJobsByUserId as getJobsByUserIdDynamo,
   getJobById as getJobByJobIdDynamo,
   createJob as createJobDynamo,
   updateJob as updateJobDynamo,
   deleteJob as deleteJobDynamo,
-} from "@/services/jobService";
-import { generateJobId } from "@/utils/generateJobId";
-import { AuthUser } from "@/types/index";
-import { AppError } from "@/utils/AppError";
-import { assertOwnership } from "@/utils/assertOwnership";
+} from '@/services/jobService';
+import { generateJobId } from '@/utils/generateJobId';
+import { AuthUser } from '@/types/index';
+import { AppError } from '@/utils/AppError';
+import { assertOwnership } from '@/utils/assertOwnership';
 import {
   jobSchema,
   createJobSchema,
   updateJobSchema,
   jobResponseSchema,
   jobsResponseSchema,
-} from "@/types/job";
-import { ZodError } from "zod";
+} from '@/types/job';
+import { ZodError } from 'zod';
 
 /*
 Controller functions, deal with request and response objects
@@ -36,10 +36,7 @@ Controller functions, deal with request and response objects
  * @throws {AppError} If retrieving jobs from DynamoDB fails
  * @returns Promise<void> - Returns void, sends JSON response with jobs data
  */
-export const getAllJobs = async (
-  request: Request,
-  response: Response
-): Promise<void> => {
+export const getAllJobs = async (request: Request, response: Response): Promise<void> => {
   const authUser = request.user as AuthUser; //telling Ts that request.user is of type AuthUser
   //extract user_id from request confidently
   const { user_id } = authUser;
@@ -51,8 +48,8 @@ export const getAllJobs = async (
     const validated = jobsResponseSchema.parse(responseData);
     response.status(200).json(validated);
   } catch (error) {
-    console.error("getAllJobs error:", error);
-    throw new AppError("Error retrieving jobs", 500);
+    console.error('getAllJobs error:', error);
+    throw new AppError('Error retrieving jobs', 500);
   }
 };
 
@@ -64,10 +61,7 @@ export const getAllJobs = async (
  * @throws {AppError} If retrieving jobs from DynamoDB fails
  * @returns Promise<void> - Returns void, sends JSON response with new job data
  */
-export const createJob = async (
-  request: Request,
-  response: Response
-): Promise<void> => {
+export const createJob = async (request: Request, response: Response): Promise<void> => {
   try {
     // Validate input
     const validatedInput = createJobSchema.parse(request.body);
@@ -77,7 +71,7 @@ export const createJob = async (
       job_id: generateJobId(),
       user_id: authUser.user_id,
       ...validatedInput,
-  last_updated_at: Date.now(),
+      last_updated_at: Date.now(),
     };
 
     // Validate full job shape
@@ -91,26 +85,23 @@ export const createJob = async (
   } catch (error) {
     if (error instanceof ZodError) {
       response.status(400).json({
-        error: "Validation failed",
+        error: 'Validation failed',
         details: error.issues.map((issue) => ({
-          path: issue.path.join("."),
+          path: issue.path.join('.'),
           message: issue.message,
         })),
       });
       return;
     }
-    console.error("createJob error:", error);
-    throw new AppError("Error creating job", 500);
+    console.error('createJob error:', error);
+    throw new AppError('Error creating job', 500);
   }
 };
 
 /**
  * Delete job by job id, ensure ownership.
  */
-export const deleteJob = async (
-  request: Request,
-  response: Response
-): Promise<void> => {
+export const deleteJob = async (request: Request, response: Response): Promise<void> => {
   const authUser = request.user as AuthUser;
   const userId = authUser.user_id;
   const { job_id } = request.params;
@@ -119,7 +110,7 @@ export const deleteJob = async (
     const job = await getJobByJobIdDynamo(job_id);
 
     if (!job) {
-      throw new AppError("Job not found", 404);
+      throw new AppError('Job not found', 404);
     }
 
     assertOwnership(job, userId);
@@ -128,18 +119,15 @@ export const deleteJob = async (
 
     response.status(204).send();
   } catch (error) {
-    console.error("deleteJob error:", error);
-    throw new AppError("Error deleting job", 500);
+    console.error('deleteJob error:', error);
+    throw new AppError('Error deleting job', 500);
   }
 };
 
 /**
  * Update job by job id, validate input and ownership, return updated job.
  */
-export const updateJob = async (
-  request: Request,
-  response: Response
-): Promise<void> => {
+export const updateJob = async (request: Request, response: Response): Promise<void> => {
   const authUser = request.user as AuthUser;
   const userId = authUser.user_id;
   const { job_id } = request.params;
@@ -149,14 +137,14 @@ export const updateJob = async (
     const validatedFields = updateJobSchema.parse(request.body);
 
     if (Object.keys(validatedFields).length === 0) {
-      response.status(400).json({ error: "No fields provided for update" });
+      response.status(400).json({ error: 'No fields provided for update' });
       return;
     }
 
     const job = await getJobByJobIdDynamo(job_id);
 
     if (!job) {
-      throw new AppError("Job not found", 404);
+      throw new AppError('Job not found', 404);
     }
 
     assertOwnership(job, userId);
@@ -170,7 +158,7 @@ export const updateJob = async (
     // Dynamo update result should have Attributes with the updated item
     const attrs = updatedJob?.Attributes;
     if (!attrs) {
-      throw new AppError("Failed to update job", 500);
+      throw new AppError('Failed to update job', 500);
     }
 
     // Validate attributes against job schema
@@ -182,15 +170,15 @@ export const updateJob = async (
   } catch (error) {
     if (error instanceof ZodError) {
       response.status(400).json({
-        error: "Validation failed",
+        error: 'Validation failed',
         details: error.issues.map((issue) => ({
-          path: issue.path.join("."),
+          path: issue.path.join('.'),
           message: issue.message,
         })),
       });
       return;
     }
-    console.error("updateJob error:", error);
-    throw new AppError("Error updating job", 500);
+    console.error('updateJob error:', error);
+    throw new AppError('Error updating job', 500);
   }
 };

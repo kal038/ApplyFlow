@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 // Base job schema
 export const jobSchema = z.object({
@@ -6,9 +6,9 @@ export const jobSchema = z.object({
   user_id: z.string().min(1),
   company: z.string().min(1).max(100).trim(),
   title: z.string().min(1).max(100).trim(),
-  status: z.enum(["Applied", "Interviewing", "Offer", "Rejected", "Withdrawn"]),
+  status: z.enum(['Applied', 'Interviewing', 'Offer', 'Rejected', 'Withdrawn']),
   applied_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), // YYYY-MM-DD format
-  notes: z.string().max(1000).optional().default(""),
+  notes: z.string().max(1000).optional().default(''),
   // Unix epoch milliseconds of last update; used for staleness calculations
   last_updated_at: z.number().int().nonnegative(),
 });

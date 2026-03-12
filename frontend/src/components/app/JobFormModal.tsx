@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Job, JobStatus } from "@/types";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Job, JobStatus } from '@/types';
 
 /*
 Used for adding and editing job entries in the Job Table.
@@ -19,9 +19,7 @@ export function JobFormModal({ job, onSave, onCancel }: JobFormModalProps) {
   const [formData, setFormData] = useState<Partial<Job>>(job);
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -34,20 +32,18 @@ export function JobFormModal({ job, onSave, onCancel }: JobFormModalProps) {
 
   // Define available job statuses
   const statuses: JobStatus[] = [
-    "Applied",
-    "Interview",
-    "Offer",
-    "Rejected",
-    "Wishlisted",
-    "Archived",
+    'Applied',
+    'Interview',
+    'Offer',
+    'Rejected',
+    'Wishlisted',
+    'Archived',
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-background rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6">
-          {job.job_id ? "Edit Job" : "Add New Job"}
-        </h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="w-full max-w-md rounded-lg bg-background p-6">
+        <h2 className="mb-6 text-2xl font-bold">{job.job_id ? 'Edit Job' : 'Add New Job'}</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -55,7 +51,7 @@ export function JobFormModal({ job, onSave, onCancel }: JobFormModalProps) {
             <Input
               id="company"
               name="company"
-              value={formData.company || ""}
+              value={formData.company || ''}
               onChange={handleChange}
               required
             />
@@ -66,7 +62,7 @@ export function JobFormModal({ job, onSave, onCancel }: JobFormModalProps) {
             <Input
               id="title"
               name="title"
-              value={formData.title || ""}
+              value={formData.title || ''}
               onChange={handleChange}
               required
             />
@@ -77,7 +73,7 @@ export function JobFormModal({ job, onSave, onCancel }: JobFormModalProps) {
             <select
               id="status"
               name="status"
-              value={formData.status || "Applied"}
+              value={formData.status || 'Applied'}
               onChange={handleChange}
               className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               required
@@ -96,7 +92,7 @@ export function JobFormModal({ job, onSave, onCancel }: JobFormModalProps) {
               id="applied_date"
               name="applied_date"
               type="date"
-              value={formData.applied_date || ""}
+              value={formData.applied_date || ''}
               onChange={handleChange}
               required
             />
@@ -107,7 +103,7 @@ export function JobFormModal({ job, onSave, onCancel }: JobFormModalProps) {
             <textarea
               id="notes"
               name="notes"
-              value={formData.notes || ""}
+              value={formData.notes || ''}
               onChange={handleChange}
               className="flex min-h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             />
@@ -117,9 +113,7 @@ export function JobFormModal({ job, onSave, onCancel }: JobFormModalProps) {
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
             </Button>
-            <Button type="submit">
-              {job.job_id ? "Update Job" : "Add Job"}
-            </Button>
+            <Button type="submit">{job.job_id ? 'Update Job' : 'Add Job'}</Button>
           </div>
         </form>
       </div>

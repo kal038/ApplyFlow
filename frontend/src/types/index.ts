@@ -12,12 +12,6 @@ export interface Job {
   notes?: string;
 }
 
-export type JobStatus =
-  | "Applied"
-  | "Interview"
-  | "Offer"
-  | "Rejected"
-  | "Wishlisted"
-  | "Archived";
+export type JobStatus = 'Applied' | 'Interview' | 'Offer' | 'Rejected' | 'Wishlisted' | 'Archived';
 
-export type ViewMode = "grid" | "cards";
+export type ViewMode = 'grid' | 'cards';
